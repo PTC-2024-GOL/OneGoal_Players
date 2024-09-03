@@ -6,14 +6,22 @@ import {
 import { Text, Searchbar, Surface } from 'react-native-paper';
 import { LinearGradient } from 'expo-linear-gradient';
 import { AntDesign } from "@expo/vector-icons";
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { PieChart } from 'react-native-gifted-charts';
+import { useFocusEffect } from "@react-navigation/native";
+import fetchData from '../../api/components';
+import { SERVER_URL } from "../../api/constantes";
 
 import logo from '../../assets/gol_blanco 2.png';
 const { width, height } = Dimensions.get('window');
 
+// URL de la API para el usuario
+const USER_API = 'services/players/jugadores.php';
 const HomeScreen = ({ logueado, setLogueado }) => {
+    const [username, setUsername] = useState("");
     const [refreshing, setRefreshing] = useState(false);
     const [centerText, setCenterText] = useState("Selecciona un segmento");
+    const [foto, setFoto] = useState("../../assets/man.png");
 
     // Simulación de la función de cierre de sesión
     const handleLogOut = async () => {
@@ -25,6 +33,23 @@ const HomeScreen = ({ logueado, setLogueado }) => {
         }
     };
 
+    //Obtiene la información del usuario desde la API
+    const getUser = async () => {
+        try {
+            const data = await fetchData(USER_API, "getUserMobile");
+            if (data.status) {
+                const [firstName] = data.username.split(" ");
+                const [firstSurname] = data.apellido.split(" ");
+                setUsername(`${firstName} ${firstSurname}`);
+                setFoto(`${SERVER_URL}images/jugadores/${data.foto}`);
+            } else {
+                console.log("Error: Nombre de jugador indefinido");
+            }
+        } catch (error) {
+            console.log(error);
+        }
+    };
+
     // Datos para la gráfica circular
     const pieData = [
         { value: 50, color: '#00BFFF', text: 'Técnicos' },
@@ -33,8 +58,26 @@ const HomeScreen = ({ logueado, setLogueado }) => {
         { value: 15, color: '#EF6347', text: 'Psicológicos' },
     ];
 
+    //Efecto que se ejecuta al montar el componente para inicializar la aplicación
+    useEffect(() => {
+        const initializeApp = async () => {
+            await getUser();
+        };
+        initializeApp();
+    }, []);
+
+    useFocusEffect(
+        useCallback(() => {
+            const initializeApp = async () => {
+                await getUser();
+            };
+            initializeApp();
+        }, [])
+    );
+
     const onRefresh = useCallback(async () => {
         setRefreshing(true);
+        await getUser();
         // Aquí se llamarán las funciones necesarias para refrescar la información
         setRefreshing(false);
     }, []);
@@ -72,11 +115,11 @@ const HomeScreen = ({ logueado, setLogueado }) => {
                     <View style={styles.infoRow}>
                         <View style={styles.rowContent}>
                             <Image
-                                source={require('../../assets/man.png')} // Reemplaza con la URL de la imagen o usa require para imagen local
+                                source={{ uri: foto }} // Reemplaza con la URL de la imagen o usa require para imagen local
                                 style={styles.profileImage}
                             />
                             <View>
-                                <Text style={styles.profileName}>Miguel Ángel Dueñas Morán</Text>
+                                <Text style={styles.profileName}>{username}</Text>
                                 <TouchableOpacity style={styles.viewProfileButton}>
                                     <Text style={styles.viewProfileText}>Ver mi perfil</Text>
                                 </TouchableOpacity>
@@ -117,18 +160,21 @@ const HomeScreen = ({ logueado, setLogueado }) => {
 
                     <Surface style={[styles.surface, { backgroundColor: '#020887' }]} elevation={5}>
                         <View style={styles.statBox}>
+                            <MaterialCommunityIcons name="soccer-field" size={24} color="white" />
                             <Text style={styles.statValue}>10</Text>
                             <Text style={styles.statLabel}>Total partidos</Text>
                         </View>
                     </Surface>
                     <Surface style={[styles.surface, { backgroundColor: '#5209B0' }]} elevation={5}>
                         <View style={styles.statBox}>
+                            <MaterialCommunityIcons name="soccer" size={24} color="white" />
                             <Text style={styles.statValue}>15</Text>
                             <Text style={styles.statLabel}>Total goles</Text>
                         </View>
                     </Surface>
                     <Surface style={[styles.surface, { backgroundColor: '#020887' }]} elevation={5}>
                         <View style={styles.statBox}>
+                            <MaterialCommunityIcons name="shoe-cleat" size={24} color="white" />
                             <Text style={styles.statValue}>10</Text>
                             <Text style={styles.statLabel}>Total asistencias</Text>
                         </View>
@@ -156,7 +202,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     headerImage: {
-        width: '100%',
+        width: width * 1,
         height: height * 0.45,
         resizeMode: 'cover',
     },
@@ -242,6 +288,7 @@ const styles = StyleSheet.create({
         fontSize: 16,
         fontWeight: 'bold',
         maxWidth: width * 0.96,
+        marginBottom: 15,
     },
     chartCenterText: {
         fontSize: 18,

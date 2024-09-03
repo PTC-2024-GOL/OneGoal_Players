@@ -4,12 +4,11 @@
     "slug": "OneGoal_Players",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/gol.png",
     "userInterfaceStyle": "light",
     "splash": {
-      "image": "./assets/splash.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "image": "./assets/splash3.png",
+      "resizeMode": "cover"
     },
     "ios": {
       "supportsTablet": true
