@@ -141,9 +141,6 @@ const LoginScreen = ({ logueado, setLogueado }) => {
               <Text style={styles.buttonText}>Iniciar sesión</Text>
             </LinearGradient>
           </TouchableOpacity>
-          <TouchableOpacity onPress={handleForgotPassword}>
-            <Text style={styles.forgotPassword}>¿Desea recuperar contraseña?</Text>
-          </TouchableOpacity>
         </View>
       </ImageBackground>
       <AlertComponent
