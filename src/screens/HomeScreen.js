@@ -85,7 +85,9 @@ const HomeScreen = ({ logueado, setLogueado }) => {
     return (
         <ScrollView
             style={styles.container}
-            refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+            refreshControl={
+                <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="white" colors={['white', 'white', 'white']}
+                progressBackgroundColor="#020887" />}
         >
             <LinearGradient colors={['#EEEEEE', '#F2F7FF']} style={styles.linearGradient}>
                 {/* Imagen Superior con Texto y Buscador */}
@@ -191,7 +193,7 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: "#fff",
-        marginBottom: height * 0.11,
+        marginBottom: height * 0.13,
     },
     linearGradient: {
         flex: 1

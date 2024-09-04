@@ -9,6 +9,7 @@ import JourneysScreen from '../screens/JourneysScreen';
 import PaymentScreen from '../screens/PaymentScreen';
 import MedicalHistory from '../screens/MedicalHistory';
 import LoginNav from '../navigation/LoginNav';
+import CustomTabLabel from './CustomTabLabel';
 
 // Navegador Bottom Tabs Navigator
 const Tab = createBottomTabNavigator();
@@ -55,6 +56,16 @@ export default function BottomTab({ logueado, setLogueado }) {
 
                     return <Ionicons name={iconName} size={size} color={color} />;
                 },
+                tabBarLabel: ({ focused, color }) => {
+                    let labelText = route.name;
+                    if (route.name === 'Medico') {
+                        labelText = 'Historial médico';
+                    } else if (route.name === 'Pagos') {
+                        labelText = 'Historial de pagos';
+                    }
+        
+                    return <CustomTabLabel text={labelText} />;
+                },
                 tabBarActiveTintColor: '#FFF',
                 tabBarInactiveTintColor: '#eee',
                 tabBarStyle: styles.tabBar,
@@ -80,8 +91,7 @@ export default function BottomTab({ logueado, setLogueado }) {
                 name="Jornadas"
                 component={RenderJourneysScreen}
                 options={{
-                    title: 'Jornadas',
-                    headerShown: false
+                    title: 'Jornadas'
                 }}
             />
             <Tab.Screen
@@ -97,7 +107,7 @@ export default function BottomTab({ logueado, setLogueado }) {
                 component={RenderMedicalHistory}
                 options={{
                     title: 'Historial medico',
-                    headerShown: false
+                    headerShown: false,
                 }}
             />
             <Tab.Screen
@@ -145,7 +155,7 @@ const styles = StyleSheet.create({
         elevation: 0,
         backgroundColor: '#03045E',
         borderRadius: 15,
-        height: 70,
+        height: 80,
         padding: 10,
         paddingBottom: 15,
     },
