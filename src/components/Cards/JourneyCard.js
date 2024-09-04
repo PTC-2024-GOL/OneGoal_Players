@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image,Dimensions } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image, Dimensions } from 'react-native';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import soccer from '../../../assets/Player-soccer.png';
 
@@ -11,15 +11,18 @@ const JourneyCard = ({ journey, onPressTraining, onPressRatings }) => {
             <Text style={styles.journeyTitle}>{journey.title}</Text>
             <Text style={styles.journeyDuration}>{journey.duration}</Text>
             <View style={styles.actionsRow}>
-                <TouchableOpacity style={styles.actionButton} onPress={() => onPressTraining(journey.id)}>
-                    <Image source={soccer}></Image>
+                <TouchableOpacity style={styles.line} onPress={() => onPressTraining(journey.id)}>
+                    <View style={styles.actionButton}>
+                        <Image source={soccer}></Image>
+                    </View>
+                    <Text style={styles.actionText}>Entrenamientos</Text>
                 </TouchableOpacity>
-                <Text style={styles.actionText}>Entrenamientos</Text>
-
-                <TouchableOpacity style={[styles.actionButton, styles.actionButtonPurple]} onPress={() => onPressRatings(journey.id)}>
-                    <FontAwesome name="pencil" size={18} color="white" />
+                <TouchableOpacity style={styles.line} onPress={() => onPressRatings(journey.id)}>
+                    <View style={[styles.actionButton, styles.actionButtonPurple]}>
+                        <FontAwesome name="pencil" size={18} color="white" />
+                    </View>
+                    <Text style={styles.actionText}>Calificaciones</Text>
                 </TouchableOpacity>
-                <Text style={styles.actionText}>Calificaciones</Text>
             </View>
         </View>
     );
@@ -71,7 +74,10 @@ const styles = StyleSheet.create({
         color: '#000',
         fontSize: 14,
         marginHorizontal: 5,
-        maxWidth: windowWidth *  0.25,
+        maxWidth: windowWidth * 0.25,
         textAlign: 'center',
+    },
+    line: {
+        alignItems: 'center',
     },
 });

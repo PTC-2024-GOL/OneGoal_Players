@@ -23,16 +23,6 @@ const HomeScreen = ({ logueado, setLogueado }) => {
     const [centerText, setCenterText] = useState("Selecciona un segmento");
     const [foto, setFoto] = useState("../../assets/man.png");
 
-    // Simulación de la función de cierre de sesión
-    const handleLogOut = async () => {
-        try {
-            // Lógica de cierre de sesión
-            setLogueado(false);
-        } catch (error) {
-            console.log('Error al cerrar sesión: ', error);
-        }
-    };
-
     //Obtiene la información del usuario desde la API
     const getUser = async () => {
         try {

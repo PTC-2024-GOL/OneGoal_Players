@@ -13,22 +13,60 @@ import soccer from '../../assets/Player-soccer.png';
 
 const JourneysScreen = ({ logueado, setLogueado }) => {
 
-    const [refreshing, setRefreshing] = useState(false);
+    // URL de la API para el usuario
+    const API = 'services/players/jornadas.php';
+    const [refreshing, setRefreshing] = useState(false); // Estado para controlar el refresco
+    const [loading, setLoading] = useState(true); // Estado para controlar la carga inicial
+    const [response, setResponse] = useState(false); // Estado para controlar si hay datos
 
-    // Datos de ejemplo para las jornadas
-    const journeys = [
+    const [journeys, setJourneys] = useState([
         { id: 1, title: "Jornada VII", duration: "De abril 2024 - octubre 2024" },
         { id: 2, title: "Jornada VI", duration: "De octubre 2023 - marzo 2024" },
         { id: 3, title: "Jornada V", duration: "De abril 2023 - septiembre 2023" },
         { id: 4, title: "Jornada IV", duration: "De octubre 2022 - marzo 2023" },
-    ];
+    ]);
+    
+    const fillCards = async () => {
+        try {
+            const DATA = await fetchData(API, 'readAllMobile');
+    
+            if (DATA.status) {
+                let data = DATA.dataset;
+                const updatedJourneys = data.map(item => ({
+                    id: item.ID,
+                    title: item.NOMBRE,
+                    duration: `Del ${item.FECHA_INICIO} al ${item.FECHA_FIN}`
+                }));
+                setJourneys(updatedJourneys);
+                setResponse(true);
+            } else {
+                console.log(DATA.error);
+                setJourneys([]);
+                setResponse(false);
+            }
+        } catch (error) {
+            console.error("Error fetching data:", error);
+        } finally {
+            setLoading(false);
+            setRefreshing(false);
+        }
+    };
+    
 
     const onRefresh = useCallback(async () => {
         setRefreshing(true);
-        // Aquí iría la lógica para refrescar los datos
-        setRefreshing(false);
+        await fillCards();
     }, []);
 
+    useEffect(() => {
+        fillCards();
+    }, []);
+
+    useFocusEffect(
+        useCallback(() => {
+            fillCards();
+        }, [])
+    )
     const handleTrainingPress = (id) => {
         // Manejar la lógica para la acción de entrenamientos
         console.log(`Entrenamientos de la Jornada ${id}`);
@@ -38,8 +76,6 @@ const JourneysScreen = ({ logueado, setLogueado }) => {
         // Manejar la lógica para la acción de calificaciones
         console.log(`Calificaciones de la Jornada ${id}`);
     };
-    // URL de la API para el usuario
-    const API = 'services/players/jornadas.php';
 
     return (
         <ScrollView style={styles.container}
