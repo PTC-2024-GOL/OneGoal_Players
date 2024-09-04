@@ -84,7 +84,6 @@ export default function BottomTab({ logueado, setLogueado }) {
                 component={RenderPerformanceScreen}
                 options={{
                     title: 'Rendimiento',
-                    headerShown: false
                 }}
             />
             <Tab.Screen
@@ -107,7 +106,6 @@ export default function BottomTab({ logueado, setLogueado }) {
                 component={RenderMedicalHistory}
                 options={{
                     title: 'Historial medico',
-                    headerShown: false,
                 }}
             />
             <Tab.Screen
@@ -115,7 +113,6 @@ export default function BottomTab({ logueado, setLogueado }) {
                 component={RenderPaymentScreen}
                 options={{
                     title: 'Historial de pagos',
-                    headerShown: false
                 }}
             />
             {/*Pantalla fuera del BottomTab*/}

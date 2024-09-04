@@ -245,7 +245,7 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderColor: '#EBF0FF',
         color: 'gray',
-        maxHeight: height * 0.08,
+        maxHeight: height * 0.07,
         maxWidth: width * 0.9,
     },
     profileContainer: {
@@ -254,8 +254,8 @@ const styles = StyleSheet.create({
         padding: 20,
     },
     profileImage: {
-        width: 60,
-        height: 60,
+        width: width * 0.15,
+        height: height * 0.1,
         borderRadius: 30,
     },
     profileName: {
@@ -335,6 +335,7 @@ const styles = StyleSheet.create({
         borderRadius: 10,
         backgroundColor: "white",
         width: "100%",
+        height: height * 0.13,
         elevation: 2,
     },
     rowContent: {
