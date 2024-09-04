@@ -79,7 +79,7 @@ const HomeScreen = ({ logueado, setLogueado }) => {
                 <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="white" colors={['white', 'white', 'white']}
                 progressBackgroundColor="#020887" />}
         >
-            <LinearGradient colors={['#EEEEEE', '#F2F7FF']} style={styles.linearGradient}>
+            <LinearGradient colors={['#F2F7FF', '#F2F7FF']} style={styles.linearGradient}>
                 {/* Imagen Superior con Texto y Buscador */}
                 <View style={styles.headerContainer}>
                     <Image

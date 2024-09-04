@@ -48,11 +48,15 @@ const styles = StyleSheet.create({
     journeyTitle: {
         fontSize: 16,
         fontWeight: 'bold',
+        textAlign: 'center',
+        maxWidth: windowWidth * 0.75
     },
     journeyDuration: {
         fontSize: 14,
         color: '#777',
         marginVertical: 5,
+        textAlign: 'center',
+        maxWidth: windowWidth * 0.75
     },
     actionsRow: {
         flexDirection: 'row',

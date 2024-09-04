@@ -9,8 +9,6 @@ import JourneyCard from '../components/Cards/JourneyCard';
 const windowHeight = Dimensions.get('window').height;
 const windowWidth = Dimensions.get('window').width;
 
-import soccer from '../../assets/Player-soccer.png';
-
 const JourneysScreen = ({ logueado, setLogueado }) => {
 
     // URL de la API para el usuario
@@ -19,22 +17,17 @@ const JourneysScreen = ({ logueado, setLogueado }) => {
     const [loading, setLoading] = useState(true); // Estado para controlar la carga inicial
     const [response, setResponse] = useState(false); // Estado para controlar si hay datos
 
-    const [journeys, setJourneys] = useState([
-        { id: 1, title: "Jornada VII", duration: "De abril 2024 - octubre 2024" },
-        { id: 2, title: "Jornada VI", duration: "De octubre 2023 - marzo 2024" },
-        { id: 3, title: "Jornada V", duration: "De abril 2023 - septiembre 2023" },
-        { id: 4, title: "Jornada IV", duration: "De octubre 2022 - marzo 2023" },
-    ]);
-    
+    const [journeys, setJourneys] = useState([]);
+
     const fillCards = async () => {
         try {
             const DATA = await fetchData(API, 'readAllMobile');
-    
+
             if (DATA.status) {
                 let data = DATA.dataset;
                 const updatedJourneys = data.map(item => ({
                     id: item.ID,
-                    title: item.NOMBRE,
+                    title: `${item.NOMBRE} - ${item.TEMPORADA}`,
                     duration: `Del ${item.FECHA_INICIO} al ${item.FECHA_FIN}`
                 }));
                 setJourneys(updatedJourneys);
@@ -51,7 +44,7 @@ const JourneysScreen = ({ logueado, setLogueado }) => {
             setRefreshing(false);
         }
     };
-    
+
 
     const onRefresh = useCallback(async () => {
         setRefreshing(true);
@@ -81,7 +74,7 @@ const JourneysScreen = ({ logueado, setLogueado }) => {
         <ScrollView style={styles.container}
             refreshControl={
                 <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="white" colors={['white', 'white', 'white']}
-                progressBackgroundColor="#020887" />
+                    progressBackgroundColor="#020887" />
             }>
             <Text style={styles.headerText}>Mira tus jornadas</Text>
             <View style={styles.infoRowTree}>
@@ -95,18 +88,38 @@ const JourneysScreen = ({ logueado, setLogueado }) => {
                     <Text style={styles.buttonText}>Jornadas</Text>
                 </TouchableOpacity>
             </View>
-            <View style={styles.scrollContainer}>
-                <ScrollView>
-                    {journeys.map((journey) => (
-                        <JourneyCard
-                            key={journey.id}
-                            journey={journey}
-                            onPressTraining={handleTrainingPress}
-                            onPressRatings={handleRatingsPress}
+
+            {loading ? (
+                <LoadingComponent />
+            ) : response ? (
+                <View style={styles.scrollContainer}>
+                    <ScrollView>
+                        {journeys.map((journey) => (
+                            <JourneyCard
+                                key={journey.id}
+                                journey={journey}
+                                onPressTraining={handleTrainingPress}
+                                onPressRatings={handleRatingsPress}
+                            />
+                        ))}
+                    </ScrollView>
+                </View>
+            ) : (
+                <ScrollView
+                    style={styles.scrollContainer}
+                    refreshControl={
+                        <RefreshControl
+                            refreshing={refreshing}
+                            onRefresh={onRefresh}
                         />
-                    ))}
+                    }
+                >
+                    <View style={{ height: 200, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <Image style={{ height: 80, width: 80, marginBottom: 10 }} source={require('../../assets/find.png')} />
+                        <Text style={{ backgroundColor: '#e6ecf1', color: '#043998', padding: 20, borderRadius: 15, maxWidth: 300 }}>No se encontraron entrenamientos</Text>
+                    </View>
                 </ScrollView>
-            </View>
+            )}
         </ScrollView>
     )
 }
