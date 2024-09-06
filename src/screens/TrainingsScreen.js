@@ -110,10 +110,8 @@ const TrainingsScreen = () => {
                 <ScrollView
                     style={styles.scrollContainer}
                     refreshControl={
-                        <RefreshControl
-                            refreshing={refreshing}
-                            onRefresh={onRefresh}
-                        />
+                        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="white" colors={['white', 'white', 'white']}
+                            progressBackgroundColor="#020887" />
                     }
                 >
                     {trainings.map((item, index) => (
