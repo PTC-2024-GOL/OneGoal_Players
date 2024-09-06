@@ -4,38 +4,69 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { useNavigation, useRoute, useFocusEffect } from "@react-navigation/native";
 import fetchData from '../../api/components';
 import LoadingComponent from "../components/LoadingComponent";
-import JourneyCard from '../components/Cards/JourneyCard';
 
 const windowHeight = Dimensions.get('window').height;
 const windowWidth = Dimensions.get('window').width;
 
-const JourneysScreen = ({ logueado, setLogueado }) => {
+import soccer from '../../assets/Player-soccer.png';
 
-    // URL de la API para el usuario
-    const API = 'services/players/jornadas.php';
+const TrainingCard = ({ date, time, playersPresent, onPress, idEntrenamiento }) => {
+    return (
+        <TouchableOpacity style={styles.card}>
+            <Text style={styles.date}>{date}</Text>
+            <Text style={styles.time}>{time}</Text>
+            <View style={styles.infoRow}>
+                <TouchableOpacity style={styles.infoRowTwo} onPress={() => onPress(idEntrenamiento)}>
+                    <View style={styles.iconButton}>
+                        <Image source={soccer}></Image>
+                    </View>
+                    <Text style={styles.linkText}>Ver asistencias</Text>
+                </TouchableOpacity>
+                <View style={styles.infoRowTwo}>
+                    <View style={styles.playersCount}>
+                        <Text style={styles.playersCountText}>{playersPresent}</Text>
+                    </View>
+                    <Text style={styles.linkText}>Jugadores presentes</Text>
+                </View>
+            </View>
+        </TouchableOpacity>
+    );
+};
+
+const TrainingsScreen = () => {
+    const navigation = useNavigation();
+    const route = useRoute();
+    const { idJornada } = route.params;
+    console.log('Id del equipo pantalla de mostrar entrenamientos: ' + idJornada);
+
+    const goToAssistsM = (idEntrenamiento) => {
+        navigation.navigate('Modificar asistencia', { idEntrenamiento, idJornada }); // Pasar idEntrenamiento y idJornada
+    };
+
+    const goToAssists = () => {
+        navigation.navigate('Asistencia', { idJornada });
+    };
+
+    const [trainings, setTrainings] = useState([]);
     const [refreshing, setRefreshing] = useState(false); // Estado para controlar el refresco
     const [loading, setLoading] = useState(true); // Estado para controlar la carga inicial
     const [response, setResponse] = useState(false); // Estado para controlar si hay datos
 
-    const [journeys, setJourneys] = useState([]);
-    const navigation = useNavigation();
+    const API = 'services/players/entrenamientos.php';
 
     const fillCards = async () => {
         try {
-            const DATA = await fetchData(API, 'readAllMobile');
+            const form = new FormData();
+            form.append('idJornada', idJornada);
+            const DATA = await fetchData(API, 'readAll', form);
 
             if (DATA.status) {
                 let data = DATA.dataset;
-                const updatedJourneys = data.map(item => ({
-                    id: item.ID,
-                    title: `${item.NOMBRE} - ${item.TEMPORADA}`,
-                    duration: `Del ${item.FECHA_INICIO} al ${item.FECHA_FIN}`
-                }));
-                setJourneys(updatedJourneys);
+                setTrainings(data);
                 setResponse(true);
             } else {
                 console.log(DATA.error);
-                setJourneys([]);
+                setTrainings([]);
                 setResponse(false);
             }
         } catch (error) {
@@ -46,69 +77,57 @@ const JourneysScreen = ({ logueado, setLogueado }) => {
         }
     };
 
-
     const onRefresh = useCallback(async () => {
         setRefreshing(true);
         await fillCards();
-    }, []);
+    }, [idJornada]);
 
     useEffect(() => {
         fillCards();
-    }, []);
+    }, [idJornada]);
 
     useFocusEffect(
         useCallback(() => {
             fillCards();
-        }, [])
+        }, [idJornada])
     )
-    const handleTrainingPress = (idJornada) => {
-        navigation.navigate('LoginNav', {
-          screen: 'Entrenamientos',
-          params: {idJornada}
-        });
-    };
-
-    const handleRatingsPress = (idJornada) => {
-        navigation.navigate('LoginNav', {
-          screen: 'Calificaciones',
-          params: {idJornada}
-        });
-    };
 
     return (
-        <ScrollView style={styles.container}
-            refreshControl={
-                <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="white" colors={['white', 'white', 'white']}
-                    progressBackgroundColor="#020887" />
-            }>
-            <Text style={styles.headerText}>Mira tus jornadas</Text>
+        <View style={styles.container}>
+            <Text style={styles.headerText}>Entrenamientos</Text>
             <View style={styles.infoRowTree}>
                 <Ionicons name="football" size={35} color="black" />
                 <Text style={styles.subHeaderText}>
-                    Selecciona una jornada y ve tus notas, entrenamientos, observaciones y más.
+                    Aquí puedes ver los entrenamientos de los últimos meses. O también puedes pasar asistencia.
                 </Text>
             </View>
-            <View style={styles.infoRowFour}>
-                <TouchableOpacity style={styles.button}>
-                    <Text style={styles.buttonText}>Jornadas</Text>
-                </TouchableOpacity>
-            </View>
-
+            <TouchableOpacity style={styles.button} onPress={goToAssists}>
+                <Text style={styles.buttonText}>Pasar asistencia</Text>
+            </TouchableOpacity>
             {loading ? (
                 <LoadingComponent />
             ) : response ? (
-                <View style={styles.scrollContainer}>
-                    <ScrollView>
-                        {journeys.map((journey) => (
-                            <JourneyCard
-                                key={journey.id}
-                                journey={journey}
-                                onPressTraining={handleTrainingPress}
-                                onPressRatings={handleRatingsPress}
-                            />
-                        ))}
-                    </ScrollView>
-                </View>
+                <ScrollView
+                    style={styles.scrollContainer}
+                    refreshControl={
+                        <RefreshControl
+                            refreshing={refreshing}
+                            onRefresh={onRefresh}
+                        />
+                    }
+                >
+                    {trainings.map((item, index) => (
+                        <TrainingCard
+                            key={index}
+                            date={item.FECHA}
+                            time={item.HORARIO}
+                            playersPresent={item.JUGADORES_PRESENTES}
+                            idEntrenamiento={item.IDEN}
+                            onPress={goToAssistsM}
+                        />
+                    ))}
+                    {refreshing && <ActivityIndicator size="large" color="#0000ff" />}
+                </ScrollView>
             ) : (
                 <ScrollView
                     style={styles.scrollContainer}
@@ -125,18 +144,16 @@ const JourneysScreen = ({ logueado, setLogueado }) => {
                     </View>
                 </ScrollView>
             )}
-        </ScrollView>
-    )
-}
-
-export default JourneysScreen;
+        </View>
+    );
+};
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
         padding: 15,
         backgroundColor: '#fff',
-        marginBottom: windowHeight * 0.13,
+        marginBottom: windowHeight * 0.12,
     },
     headerText: {
         fontSize: 24,
@@ -150,24 +167,19 @@ const styles = StyleSheet.create({
         maxWidth: windowWidth,
     },
     button: {
-        backgroundColor: '#334195', // Green color
-        paddingLeft: 20,
-        paddingRight: 20,
-        paddingTop: 8,
-        paddingBottom: 8,
+        backgroundColor: '#5AE107', // Green color
+        padding: 12,
         borderRadius: 8,
         alignItems: 'center',
         marginBottom: 16,
-        maxWidth: windowWidth * 0.6,
     },
     buttonText: {
-        color: '#fff',
+        color: '#000',
         fontSize: 16,
-        fontWeight: 'italic',
+        fontWeight: 'bold',
     },
     scrollContainer: {
         flex: 1,
-        paddingBottom: 15,
     },
     card: {
         backgroundColor: '#fff',
@@ -206,10 +218,6 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         margin: 6,
     },
-    infoRowFour: {
-        alignItems: 'center',
-        margin: 6,
-    },
     linkText: {
         color: '#000000',
         textDecorationLine: 'underline',
@@ -238,63 +246,7 @@ const styles = StyleSheet.create({
         color: '#fff',
         fontSize: 16,
         fontWeight: 'bold',
-    }, tableHeader: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        backgroundColor: '#473698',
-        borderRadius: 8,
-        padding: 10,
-        marginBottom: 10,
     },
-    tableHeaderText: {
-        color: 'white',
-        fontSize: 16,
-        fontWeight: 'bold',
-    },
-    card: {
-        backgroundColor: '#fff',
-        padding: 16,
-        marginVertical: 8,
-        borderRadius: 8,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.25,
-        shadowRadius: 4,
-        elevation: 5,
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-    },
-    journeyTitle: {
-        fontSize: 16,
-        fontWeight: 'bold',
-    },
-    journeyDuration: {
-        fontSize: 14,
-        color: '#777',
-        marginVertical: 5,
-    },
-    actionsRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
-    },
-    actionButton: {
-        backgroundColor: '#5AE107',
-        borderRadius: 20,
-        width: 40,
-        height: 40,
-        alignItems: 'center',
-        justifyContent: 'center',
-        marginHorizontal: 5,
-    },
-    actionButtonPurple: {
-        backgroundColor: '#8A2BE2',
-    },
-    actionText: {
-        color: '#000',
-        fontSize: 12,
-        marginHorizontal: 5,
-        maxWidth: 85,
-        textAlign: 'center',
-    },
-})
+});
+
+export default TrainingsScreen;
