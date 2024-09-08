@@ -3,7 +3,7 @@ import {
     View,
     StyleSheet,
     TouchableOpacity,
-    Image, Dimensions,
+    Image, Dimensions, ScrollView,
 } from 'react-native';
 import { Text} from 'react-native-paper';
 import {LinearGradient} from "expo-linear-gradient";
@@ -19,26 +19,28 @@ const WelcomeScreen = () => {
 
   return(
       <LinearGradient colors={['#185AAE', '#185AAE']} style={styles.linearGradient}>
-          <View style={styles.container}>
-              <Image
-                  source={require('../../assets/welcomeImg.png')}
-                  style={styles.image}
-              />
-          </View>
-          <View style={styles.row}>
-              <Image style={styles.icon} source={require('../../assets/gol_blanco 2.png')}/>
-          </View>
-          <View style={styles.containerText}>
-              <Text style={styles.title}>Un gol para El Salvador</Text>
-              <Text style={styles.textContent}>Lleva el control de tus entrenos y partidos diariamente</Text>
-          </View>
-          <TouchableOpacity  onPress={() => (navigation.navigate('LoginScreen'))}>
-              <LinearGradient colors={['#5A71FF', '#1A2462']} style={styles.button}>
-                  <View style={styles.row}>
-                      <Text style={styles.buttonText}>Empezar</Text>
-                  </View>
-              </LinearGradient>
-          </TouchableOpacity>
+          <ScrollView>
+              <View style={styles.container}>
+                  <Image
+                      source={require('../../assets/welcomeImg.png')}
+                      style={styles.image}
+                  />
+              </View>
+              <View style={styles.row}>
+                  <Image style={styles.icon} source={require('../../assets/gol_blanco 2.png')}/>
+              </View>
+              <View style={styles.containerText}>
+                  <Text style={styles.title}>Un gol para El Salvador</Text>
+                  <Text style={styles.textContent}>Lleva el control de tus entrenos y partidos diariamente</Text>
+              </View>
+              <TouchableOpacity  onPress={() => (navigation.navigate('LoginScreen'))}>
+                  <LinearGradient colors={['#5A71FF', '#1A2462']} style={styles.button}>
+                      <View style={styles.row}>
+                          <Text style={styles.buttonText}>Empezar</Text>
+                      </View>
+                  </LinearGradient>
+              </TouchableOpacity>
+          </ScrollView>
       </LinearGradient>
   )
 }
@@ -57,6 +59,7 @@ const styles = StyleSheet.create({
         borderRadius: 10,
         marginTop: height * 0.05,
         marginHorizontal: 20,
+        marginBottom: 35
     },
     linearGradient: {
         flex: 1
@@ -65,12 +68,10 @@ const styles = StyleSheet.create({
         flex: 1,
         resizeMode: 'cover',
         aspectRatio: width * 0.003,
-        borderBottomLeftRadius: 140,
-        borderBottomRightRadius: 140,
         borderRadius: 30
     },
     title: {
-        fontSize: 30,
+        fontSize: 28,
         color: 'white',
         marginTop: 5,
         fontFamily: 'Poppins_600SemiBold'
