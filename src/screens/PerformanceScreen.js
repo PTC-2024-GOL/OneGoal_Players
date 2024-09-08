@@ -18,15 +18,23 @@ const width = Dimensions.get('window').width;
 const PerformanceScreen = ({ logueado, setLogueado }) => {
     Fonts();
     const [activeChip, setActiveChip] = useState('Recientes');
+    const [activeSection, setActiveSection] = useState('Recientes');
     const [matches, setMatches] = useState([]);
     const [data, setData] = useState(false);
     // URL de la API para el usuario
     const USER_API = 'services/players/partidos.php';
     const navigation = useNavigation();
 
-    const fillCards = async () => {
+    const changeScreen = (section) => {
+        // Manejo para el cambio de pantalla
+        setActiveSection(section);
+        // Manejo para el estilo de los chips
+        setActiveChip(section);
+    };
+
+    const fillNewMatches = async () => {
         try{
-            const data = await fetchData(USER_API, 'readAllMobile');
+            const data = await fetchData(USER_API, 'readAllByIdJugadorNew');
             if(data.status) {
                 const info = data.dataset;
                 setMatches(info);
@@ -40,6 +48,30 @@ const PerformanceScreen = ({ logueado, setLogueado }) => {
         }
     }
 
+    const fillOldMatches = async () => {
+        try{
+            const data = await fetchData(USER_API, 'readAllByIdJugadorOld');
+            if(data.status) {
+                const info = data.dataset;
+                setMatches(info);
+                setData(true)
+            }else{
+                console.log(data.error)
+                setData(false)
+            }
+        }catch (e){
+            console.log(e)
+        }
+    }
+
+    const filter = async () => {
+        if(activeChip === 'Recientes') {
+           await fillNewMatches();
+        }else{
+           await fillOldMatches();
+        }
+    }
+
     const goToPerformanceDetails = (idPartido) => {
         navigation.navigate('LoginNav', {
             screen: 'RendimientoDetalle',
@@ -49,8 +81,8 @@ const PerformanceScreen = ({ logueado, setLogueado }) => {
 
     useFocusEffect(
         useCallback(()=>{
-            fillCards();
-        },[])
+            filter()
+        },[activeChip])
     )
 
     return (
@@ -65,10 +97,12 @@ const PerformanceScreen = ({ logueado, setLogueado }) => {
                 {/*BUTTONS*/}
                 <View style={styles.rowButton}>
                     <Chip
+                        onPress={() => changeScreen('Recientes')}
                         style={{backgroundColor: activeChip === 'Recientes' ? '#334195' : '#E4E0E1',}}
                         textStyle={{color: activeChip === 'Recientes' ? 'white' : '#9A9A9A', fontFamily: 'Poppins_400Regular'}}>Recientes
                     </Chip>
                     <Chip
+                        onPress={() => changeScreen('Antiguos')}
                         style={{backgroundColor: activeChip === 'Antiguos' ? '#334195' : '#E4E0E1',}}
                         textStyle={{color: activeChip === 'Antiguos' ? 'white' : '#9A9A9A', fontFamily: 'Poppins_400Regular'}}>Antiguos
                     </Chip>
@@ -112,8 +146,7 @@ const styles = StyleSheet.create({
     },
     container: {
         marginHorizontal: width * 0.05,
-        marginBottom: 50,
-
+        marginBottom: 50
     },
     title: {
         fontSize: 20,
