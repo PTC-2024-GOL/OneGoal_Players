@@ -5,17 +5,17 @@ import {Card} from "react-native-paper";
 const windowHeight = Dimensions.get('window').height;
 const windowWidth = Dimensions.get('window').width;
 
-const MatchesCard = ({ journey, onPressTraining, onPressRatings }) => {
+const MatchesCard = ({teamName, rivalName, teamImg, rivalImg, date, id, goToScreen}) => {
     return (
-        <Card mode={"elevated"} style={styles.card}>
-            <Text style={styles.title}>Gol vs. Alianza</Text>
+        <Card mode={"elevated"} style={styles.card} onPress={() => goToScreen(id)}>
+            <Text style={styles.title}>{teamName} vs. {rivalName}</Text>
             <View style={styles.row}>
-                <Image style={styles.img} source={require('../../../assets/gol.png')}/>
+                <Image style={styles.img} source={{uri: teamImg}}/>
                 <View style={styles.col}>
                     <Text style={styles.dateTitle}>Fecha</Text>
-                    <Text style={styles.dateText}>14 de noviembre de 2023</Text>
+                    <Text style={styles.dateText}>{date}</Text>
                 </View>
-                <Image style={styles.img} source={require('../../../assets/gol.png')}/>
+                <Image style={styles.img} source={{uri: rivalImg}}/>
             </View>
         </Card>
     );

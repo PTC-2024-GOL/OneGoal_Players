@@ -1,4 +1,4 @@
-import { useNavigation } from '@react-navigation/native';
+import {useFocusEffect, useNavigation} from '@react-navigation/native';
 import {
     View,
     StyleSheet,
@@ -9,18 +9,49 @@ import {Chip, Text} from 'react-native-paper';
 import { LinearGradient } from "expo-linear-gradient";
 import fetchData from '../../api/components';
 import Fonts from "../../fonts/fonts";
-import {useState} from "react";
+import {useCallback, useState} from "react";
 import MatchesCard from "../components/Cards/MatchesCard";
+import {SERVER_URL} from "../../api/constantes";
 
 const width = Dimensions.get('window').width;
 
 const PerformanceScreen = ({ logueado, setLogueado }) => {
     Fonts();
     const [activeChip, setActiveChip] = useState('Recientes');
+    const [matches, setMatches] = useState([]);
+    const [data, setData] = useState(false);
     // URL de la API para el usuario
-    const USER_API = 'services/players/jugadores.php';
-
+    const USER_API = 'services/players/partidos.php';
     const navigation = useNavigation();
+
+    const fillCards = async () => {
+        try{
+            const data = await fetchData(USER_API, 'readAllMobile');
+            if(data.status) {
+                const info = data.dataset;
+                setMatches(info);
+                setData(true)
+            }else{
+                console.log(data.error)
+                setData(false)
+            }
+        }catch (e){
+            console.log(e)
+        }
+    }
+
+    const goToPerformanceDetails = (idPartido) => {
+        navigation.navigate('LoginNav', {
+            screen: 'RendimientoDetalle',
+            params: {idPartido}
+        });
+    };
+
+    useFocusEffect(
+        useCallback(()=>{
+            fillCards();
+        },[])
+    )
 
     return (
         <View style={styles.globalContainer}>
@@ -45,8 +76,26 @@ const PerformanceScreen = ({ logueado, setLogueado }) => {
                 <View style={styles.line}></View>
                 <ScrollView>
                     <View style={styles.cardsContainer}>
-                        <MatchesCard/>
-                        <MatchesCard/>
+                        {
+                            data  ? (
+                                matches.map((item, index) => (
+                                    <MatchesCard
+                                        key={index}
+                                        id={item.id_partido}
+                                        teamName={item.nombre_equipo}
+                                        rivalName={item.nombre_rival}
+                                        date={item.fecha}
+                                        teamImg={`${SERVER_URL}images/equipos/${item.logo_equipo}`}
+                                        rivalImg={`${SERVER_URL}images/rivales/${item.logo_rival}`}
+                                        goToScreen={goToPerformanceDetails}
+                                    />
+                                ))
+                            ) : (
+                                <View>
+                                    <Text>Aún no has tenido partidos</Text>
+                                </View>
+                            )
+                        }
                     </View>
                 </ScrollView>
             </View>
