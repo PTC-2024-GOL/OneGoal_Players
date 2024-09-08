@@ -1,8 +1,10 @@
 import React from 'react';
 import { Text, View, StyleSheet, Dimensions } from 'react-native';
+import Fonts from "../../fonts/fonts";
 const windowWidth = Dimensions.get('window').width;
 
 const CustomTabLabel = ({ text }) => {
+    Fonts();
     return (
         <View style={styles.labelContainer}>
             <Text style={styles.labelText}>{text}</Text>
@@ -15,7 +17,8 @@ const styles = StyleSheet.create({
         maxWidth: windowWidth * 0.2,  // Ajusta el ancho máximo según sea necesario
     },
     labelText: {
-        fontSize: 12,
+        fontFamily: 'Poppins_400Regular',
+        fontSize: 9,
         textAlign: 'center',
         color: 'white',
     },

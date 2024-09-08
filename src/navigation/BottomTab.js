@@ -1,7 +1,7 @@
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import Ionicons from '@expo/vector-icons/Ionicons';
+import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import HomeScreen from '../screens/HomeScreen';
 import PerformanceScreen from '../screens/PerformanceScreen';
@@ -10,11 +10,13 @@ import PaymentScreen from '../screens/PaymentScreen';
 import MedicalHistory from '../screens/MedicalHistory';
 import LoginNav from '../navigation/LoginNav';
 import CustomTabLabel from './CustomTabLabel';
+import Fonts from "../../fonts/fonts";
 
 // Navegador Bottom Tabs Navigator
 const Tab = createBottomTabNavigator();
 
 export default function BottomTab({ logueado, setLogueado }) {
+    Fonts();
     // Función para renderizar HomeScreen con props
     const RenderHomeScreen = props => (
         <HomeScreen {...props} setLogueado={setLogueado} logueado={logueado} />
@@ -45,23 +47,23 @@ export default function BottomTab({ logueado, setLogueado }) {
                     if (route.name === 'Inicio') {
                         iconName = focused ? 'home' : 'home-outline';
                     } else if (route.name === 'Rendimiento') {
-                        iconName = focused ? 'football' : 'football-outline';
+                        iconName = focused ? 'soccer' : 'soccer';
                     } else if (route.name === 'Jornadas') {
-                        iconName = focused ? 'calendar-clear' : 'calendar-clear-outline';
+                        iconName = focused ? 'soccer-field' : 'soccer-field';
                     } else if (route.name === 'Medico') {
-                        iconName = focused ? 'bag-add' : 'bag-add-outline';
+                        iconName = focused ? 'cards-heart' : 'cards-heart-outline';
                     } else if (route.name === 'Pagos') {
-                        iconName = focused ? 'cash' : 'cash-outline';
+                        iconName = focused ? 'currency-usd' : 'currency-usd';
                     }
 
-                    return <Ionicons name={iconName} size={size} color={color} />;
+                    return <Icon name={iconName} size={size} color={color} />;
                 },
                 tabBarLabel: ({ focused, color }) => {
                     let labelText = route.name;
                     if (route.name === 'Medico') {
                         labelText = 'Historial médico';
                     } else if (route.name === 'Pagos') {
-                        labelText = 'Historial de pagos';
+                        labelText = 'Pagos';
                     }
         
                     return <CustomTabLabel text={labelText} />;
@@ -71,11 +73,12 @@ export default function BottomTab({ logueado, setLogueado }) {
                 tabBarStyle: styles.tabBar,
                 headerStyle: {
                     backgroundColor: '#0078B7',
-                    borderBottomRightRadius: 35,
-                    borderBottomLeftRadius: 35,
                 },
                 headerTintColor: '#fff',
                 tabBarLabelStyle: styles.tabBarLabel,
+                headerTitleStyle: {
+                  fontFamily: 'Poppins_500Medium'
+                },
                 headerTitleAlign: 'center',
             })}
         >
@@ -151,14 +154,14 @@ const styles = StyleSheet.create({
         right: 20,
         elevation: 0,
         backgroundColor: '#03045E',
-        borderRadius: 15,
+        borderRadius: 50,
         height: 80,
         padding: 10,
         paddingBottom: 15,
     },
     tabBarLabel: {
         fontSize: 12,
-        fontWeight: 'bold',
+        fontWeight: 'bold'
     },
     customButtonContainer: {
         top: -16,

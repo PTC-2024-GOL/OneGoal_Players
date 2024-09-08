@@ -26,7 +26,6 @@ const WelcomeScreen = () => {
                       style={styles.image}
                   />
               </View>
-              <View style={styles.boxWhite}></View>
               <View style={styles.row}>
                   <Image style={styles.icon} source={require('../../assets/gol_blanco 2.png')}/>
               </View>
@@ -54,12 +53,6 @@ const styles = StyleSheet.create({
         width: null,
         height: 450
     },
-    boxWhite: {
-        borderRadius: 100,
-      backgroundColor: '#185AAE',
-      width: '100%',
-      height: 20
-    },
     button: {
         backgroundColor: 'white',
         padding: 15,
@@ -78,13 +71,12 @@ const styles = StyleSheet.create({
         borderRadius: 30
     },
     title: {
-        textAlign: "center",
         fontSize: 28,
         color: 'white',
         fontFamily: 'Poppins_600SemiBold'
     },
     textContent: {
-        textAlign: "center",
+
         color: 'white',
         fontSize: 18,
         fontFamily: 'Poppins_400Regular'
