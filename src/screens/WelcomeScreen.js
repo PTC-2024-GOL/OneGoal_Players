@@ -7,29 +7,37 @@ import {
 } from 'react-native';
 import { Text} from 'react-native-paper';
 import {LinearGradient} from "expo-linear-gradient";
+import Fonts from "../../fonts/fonts";
 
 const width = Dimensions.get('window').width;
+const height = Dimensions.get('window').height;
 
 const WelcomeScreen = () => {
+  //Utilizamos nuestras fuentes - Para saber como se llaman las fuentes, revisar fonts.js
+  Fonts();
   const navigation = useNavigation();
 
   return(
-      <LinearGradient colors={['#090BA0', '#03043A']} style={styles.linearGradient}>
+      <LinearGradient colors={['#185AAE', '#185AAE']} style={styles.linearGradient}>
           <View style={styles.container}>
               <Image
-                  source={require('../../assets/welcomeScreen.png')}
+                  source={require('../../assets/welcomeImg.png')}
                   style={styles.image}
               />
           </View>
-              <View style={styles.containerText}>
-                  <Text style={styles.title}>Lleva el control de tus equipos</Text>
-                  <Text style={styles.textContent}>El éxito no es la victoria, sino el esfuerzo que pusiste en ella</Text>
-              </View>
-          <TouchableOpacity underlayColor="#ccc" style={styles.button} onPress={() => (navigation.navigate('LoginScreen'))}>
-              <View style={styles.row}>
-                  <Text style={styles.buttonText}>Comenzar</Text>
-                  <Image source={require('../../assets/arrow.png')}/>
-              </View>
+          <View style={styles.row}>
+              <Image style={styles.icon} source={require('../../assets/gol_blanco 2.png')}/>
+          </View>
+          <View style={styles.containerText}>
+              <Text style={styles.title}>Un gol para El Salvador</Text>
+              <Text style={styles.textContent}>Lleva el control de tus entrenos y partidos diariamente</Text>
+          </View>
+          <TouchableOpacity  onPress={() => (navigation.navigate('LoginScreen'))}>
+              <LinearGradient colors={['#5A71FF', '#1A2462']} style={styles.button}>
+                  <View style={styles.row}>
+                      <Text style={styles.buttonText}>Empezar</Text>
+                  </View>
+              </LinearGradient>
           </TouchableOpacity>
       </LinearGradient>
   )
@@ -46,9 +54,8 @@ const styles = StyleSheet.create({
     button: {
         backgroundColor: 'white',
         padding: 15,
-        borderRadius: 25,
-        width: 180,
-        marginTop: 40,
+        borderRadius: 10,
+        marginTop: height * 0.05,
         marginHorizontal: 20,
     },
     linearGradient: {
@@ -58,30 +65,36 @@ const styles = StyleSheet.create({
         flex: 1,
         resizeMode: 'cover',
         aspectRatio: width * 0.003,
+        borderBottomLeftRadius: 140,
+        borderBottomRightRadius: 140,
         borderRadius: 30
     },
     title: {
         fontSize: 30,
         color: 'white',
-        marginTop: 15,
-        fontWeight: 'bold'
+        marginTop: 5,
+        fontFamily: 'Poppins_600SemiBold'
     },
     textContent: {
-        marginTop: 10,
         color: 'white',
-        fontSize: 14,
-        fontWeight: 'ultralight'
+        fontSize: 18,
+        fontFamily: 'Poppins_400Regular'
     },
     containerText:{
         marginHorizontal: 20
     },
     buttonText:{
-        fontSize: 16,
-        fontWeight: 'bold',
+        color: '#fff',
+        fontSize: 18,
+        fontFamily: 'Poppins_500Medium'
     },
     row: {
         flexDirection: "row",
         flexWrap: "wrap",
-        justifyContent: "space-between"
+        justifyContent: "center"
+    },
+    icon : {
+        width: 150,
+        height: 150
     }
 })
