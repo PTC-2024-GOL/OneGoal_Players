@@ -4,30 +4,22 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { useNavigation, useRoute, useFocusEffect } from "@react-navigation/native";
 import fetchData from '../../api/components';
 import LoadingComponent from "../components/LoadingComponent";
+import FontAwesome from '@expo/vector-icons/FontAwesome';
 
 const windowHeight = Dimensions.get('window').height;
 const windowWidth = Dimensions.get('window').width;
 
-import soccer from '../../assets/Player-soccer.png';
-
-const TrainingCard = ({ date, time, playersPresent, onPress, idEntrenamiento }) => {
+const TrainingCard = ({ date, onPress, idEntrenamiento }) => {
     return (
         <TouchableOpacity style={styles.card}>
-            <Text style={styles.date}>{date}</Text>
-            <Text style={styles.time}>{time}</Text>
             <View style={styles.infoRow}>
+                <Text style={styles.date}>{date}</Text>
                 <TouchableOpacity style={styles.infoRowTwo} onPress={() => onPress(idEntrenamiento)}>
                     <View style={styles.iconButton}>
-                        <Image source={soccer}></Image>
+                        <FontAwesome name="folder-open" size={20} color="white" />
                     </View>
-                    <Text style={styles.linkText}>Ver asistencias</Text>
+                    <Text style={styles.linkText}>Ver mis notas</Text>
                 </TouchableOpacity>
-                <View style={styles.infoRowTwo}>
-                    <View style={styles.playersCount}>
-                        <Text style={styles.playersCountText}>{playersPresent}</Text>
-                    </View>
-                    <Text style={styles.linkText}>Jugadores presentes</Text>
-                </View>
             </View>
         </TouchableOpacity>
     );
@@ -41,10 +33,6 @@ const GradesScreen = () => {
 
     const goToAssistsM = (idEntrenamiento) => {
         navigation.navigate('Modificar asistencia', { idEntrenamiento, idJornada }); // Pasar idEntrenamiento y idJornada
-    };
-
-    const goToAssists = () => {
-        navigation.navigate('Asistencia', { idJornada });
     };
 
     const [trainings, setTrainings] = useState([]);
@@ -98,12 +86,9 @@ const GradesScreen = () => {
             <View style={styles.infoRowTree}>
                 <Ionicons name="football" size={35} color="black" />
                 <Text style={styles.subHeaderText}>
-                    Aquí puedes ver los entrenamientos de los últimos meses. O también puedes pasar asistencia.
+                    Aquí puedes elegir entre los entrenamientos de los ultimos meses, para que puedas revisar us notas.
                 </Text>
             </View>
-            <TouchableOpacity style={styles.button} onPress={goToAssists}>
-                <Text style={styles.buttonText}>Pasar asistencia</Text>
-            </TouchableOpacity>
             {loading ? (
                 <LoadingComponent />
             ) : response ? (
@@ -117,10 +102,8 @@ const GradesScreen = () => {
                     {trainings.map((item, index) => (
                         <TrainingCard
                             key={index}
-                            date={item.FECHA}
-                            time={item.HORARIO}
-                            playersPresent={item.JUGADORES_PRESENTES}
-                            idEntrenamiento={item.IDEN}
+                            date={item.detalle_entrenamiento}
+                            idEntrenamiento={item.id_entrenamiento}
                             onPress={goToAssistsM}
                         />
                     ))}
@@ -223,7 +206,7 @@ const styles = StyleSheet.create({
         maxWidth: 125
     },
     iconButton: {
-        backgroundColor: '#5AE107',
+        backgroundColor: '#090BA0',
         borderRadius: 20,
         width: 40,
         height: 40,

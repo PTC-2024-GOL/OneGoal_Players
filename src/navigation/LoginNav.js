@@ -43,13 +43,13 @@ export default function LoginNav({ logueado, setLogueado }) {
          name='Calificaciones'
          options={{headerShown: true}}
       >
-        {props => <TrainingsScreen {...props} setLogueado={setLogueado} logueado={logueado} />}
+        {props => <GradesScreen {...props} setLogueado={setLogueado} logueado={logueado} />}
       </Stack.Screen>
       <Stack.Screen
         name='Entrenamientos'
         options={{ headerShown: true }}
       >
-        {props => <GradesScreen {...props} setLogueado={setLogueado} logueado={logueado} />}
+        {props => <TrainingsScreen {...props} setLogueado={setLogueado} logueado={logueado} />}
       </Stack.Screen>
     </Stack.Navigator>
   );
