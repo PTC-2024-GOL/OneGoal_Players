@@ -11,6 +11,7 @@ import { PieChart } from 'react-native-gifted-charts';
 import { useFocusEffect } from "@react-navigation/native";
 import fetchData from '../../api/components';
 import { SERVER_URL } from "../../api/constantes";
+import { useNavigation } from '@react-navigation/native'; 
 
 import logo from '../../assets/gol_blanco 2.png';
 const { width, height } = Dimensions.get('window');
@@ -22,6 +23,9 @@ const HomeScreen = ({ logueado, setLogueado }) => {
     const [refreshing, setRefreshing] = useState(false);
     const [centerText, setCenterText] = useState("Selecciona un segmento");
     const [foto, setFoto] = useState("../../assets/man.png");
+    
+  const navigation = useNavigation(); // Obtiene el objeto de navegación
+
 
     //Obtiene la información del usuario desde la API
     const getUser = async () => {
@@ -39,6 +43,12 @@ const HomeScreen = ({ logueado, setLogueado }) => {
             console.log(error);
         }
     };
+
+    const handleProfile = () => {
+        navigation.navigate('LoginNav', {
+            screen: 'Profile'
+          });
+      };
 
     // Datos para la gráfica circular
     const pieData = [
@@ -112,7 +122,7 @@ const HomeScreen = ({ logueado, setLogueado }) => {
                             />
                             <View>
                                 <Text style={styles.profileName}>{username}</Text>
-                                <TouchableOpacity style={styles.viewProfileButton}>
+                                <TouchableOpacity style={styles.viewProfileButton} onPress={handleProfile}>
                                     <Text style={styles.viewProfileText}>Ver mi perfil</Text>
                                 </TouchableOpacity>
                             </View>

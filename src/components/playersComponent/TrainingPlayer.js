@@ -68,7 +68,7 @@ const TrainingPlayer = () => {
                 setLoading(false);
             };
             fetchData();
-        },)
+        },[])
     );
 
     //en la variable data le asignamos todas la notas traidas de la api asi como su area.

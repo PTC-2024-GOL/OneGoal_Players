@@ -1,15 +1,17 @@
-import {StyleSheet, View, Text, SafeAreaView} from "react-native";
-import {LinearGradient} from "expo-linear-gradient";
-import {Avatar, Chip} from "react-native-paper";
-import {useCallback, useState} from "react";
-import {useFocusEffect, useRoute} from "@react-navigation/native"; // Importa useRoute
+import { StyleSheet, View, Text, Alert, TouchableOpacity, SafeAreaView } from "react-native";
+import { LinearGradient } from "expo-linear-gradient";
+import { Avatar, Chip } from "react-native-paper";
+import { useCallback, useState } from "react";
+import Entypo from "@expo/vector-icons/Entypo";
+import { useFocusEffect, useRoute } from "@react-navigation/native"; // Importa useRoute
 import InfoPlayers from "../components/playersComponent/InfoPlayer";
 import TrainingPlayer from "../components/playersComponent/TrainingPlayer";
 //import AssistancePlayer from "../components/playersComponent/AssistancePlayer";
 import fetchData from "../../api/components";
-import {SERVER_URL} from "../../api/constantes";
 
-const PlayersDetails = () => {
+import { SERVER_URL } from "../../api/constantes";
+
+const ProfileScreen = ({ logueado, setLogueado }) => {
     // Manejo del cambio de pantallas.
     const [activeSection, setActiveSection] = useState('informacion');
     // Manejo para el estilo de los botones.
@@ -31,32 +33,47 @@ const PlayersDetails = () => {
     //Peticion a la api para traerme informacion sobre el estado fisico del jugador
     const fillEstadoFisico = async () => {
         const data = await fetchData(API_ESTADO_FISICO, 'readAllMobilePlayers')
-        if(data.status){
+        if (data.status) {
             let dataEstate = data.dataset;
             setEstadoFisico(dataEstate);
             console.log(estadoFisico);
-        }else {
+        } else {
             console.log(data.error);
         }
     }
 
+    // Manejo de cierre de sesión
+    const handleLogOut = async () => {
+        try {
+            const data = await fetchData(API_PLAYERS, "logOut");
+            if (data.status) {
+                setLogueado(false)
+            } else {
+                Alert.alert("Error sesión", data.error);
+            }
+        } catch (error) {
+            console.log("Error: ", error);
+            Alert.alert("Error sesión", error);
+        }
+    };
+
     //Peticion a la api para traerme informacion sobre el jugador
     const fillPlayers = async () => {
         const data = await fetchData(API_PLAYERS, 'readOneMobile');
-        if(data.status){
+        if (data.status) {
             let dataPlayers = data.dataset;
             setPlayers(dataPlayers)
-        }else{
+        } else {
             console.log(data.error)
         }
     }
 
     // Permite que se llame a la funcion cada vez que cambie el idEquipo, filter o el search
     useFocusEffect(
-        useCallback(()=>{
+        useCallback(() => {
             fillPlayers();
             fillEstadoFisico();
-        },[activeSection])
+        }, [activeSection])
     )
 
     // Variable que guardará el contenido que se mostrará en la pantalla
@@ -64,14 +81,14 @@ const PlayersDetails = () => {
     // Evaluamos la opción que se ha elegido y dependiendo de ello inyectará el componente de la información requerida a contentComponent.
     switch (activeSection) {
         case 'informacion':
-            contentComponent = <InfoPlayers informationPlayer={players} estadoFisico={estadoFisico}/>;
+            contentComponent = <InfoPlayers informationPlayer={players} estadoFisico={estadoFisico} />;
             break;
         case 'rendimiento':
             contentComponent = <TrainingPlayer />;
             break;
-            case 'asistencias':
-                //contentComponent = <AssistancePlayer />;
-                break;
+        case 'asistencias':
+            //contentComponent = <AssistancePlayer />;
+            break;
         default:
             contentComponent = null;
     }
@@ -81,27 +98,30 @@ const PlayersDetails = () => {
             {/*HEADER*/}
 
             <LinearGradient style={styles.linearGradient} colors={['#03045E', '#0608C4']}>
-                <Avatar.Image size={120} source={{uri: `${SERVER_URL}images/jugadores/${players.foto_jugador}`}}/>
+                <Avatar.Image size={120} source={{ uri: `${SERVER_URL}images/jugadores/${players.foto_jugador}` }} />
                 <Text style={styles.namePlayer}>{players.nombre_jugador + ' ' + players.apellido_jugador}</Text>
                 <Text style={styles.positionPlayer}>{players.posicionPrincipal}</Text>
+                <TouchableOpacity onPress={handleLogOut} style={styles.logoutIcon}>
+                    <Entypo name="log-out" size={30} color="#FFF" />
+                </TouchableOpacity>
             </LinearGradient>
 
             {/*BUTTONS*/}
             <View style={styles.rowButton}>
                 <Chip
-                    style={{backgroundColor: activeChip === 'informacion' ? '#03045E' : '#F2EEEF',}}
+                    style={{ backgroundColor: activeChip === 'informacion' ? '#03045E' : '#F2EEEF', }}
                     onPress={() => changeScreen('informacion')}
-                    textStyle={{color: activeChip === 'informacion' ? 'white' : '#9A9A9A'}}>Información
+                    textStyle={{ color: activeChip === 'informacion' ? 'white' : '#9A9A9A' }}>Información
                 </Chip>
                 <Chip
-                    style={{backgroundColor: activeChip === 'rendimiento' ? '#03045E' : '#F2EEEF',}}
+                    style={{ backgroundColor: activeChip === 'rendimiento' ? '#03045E' : '#F2EEEF', }}
                     onPress={() => changeScreen('rendimiento')}
-                    textStyle={{color: activeChip === 'rendimiento' ? 'white' : '#9A9A9A'}}>Rendimiento
+                    textStyle={{ color: activeChip === 'rendimiento' ? 'white' : '#9A9A9A' }}>Rendimiento
                 </Chip>
                 <Chip
-                    style={{backgroundColor: activeChip === 'asistencias' ? '#03045E' : '#F2EEEF',}}
+                    style={{ backgroundColor: activeChip === 'asistencias' ? '#03045E' : '#F2EEEF', }}
                     onPress={() => changeScreen('asistencias')}
-                    textStyle={{color: activeChip === 'asistencias' ? 'white' : '#9A9A9A'}}>Asistencias
+                    textStyle={{ color: activeChip === 'asistencias' ? 'white' : '#9A9A9A' }}>Asistencias
                 </Chip>
             </View>
 
@@ -124,6 +144,11 @@ const styles = StyleSheet.create({
         borderBottomLeftRadius: 20,
         borderBottomRightRadius: 20
     },
+    logoutIcon: {
+        position: "absolute",
+        top: 40,
+        right: 20,
+    },
     namePlayer: {
         fontSize: 30,
         fontWeight: "bold",
@@ -141,4 +166,4 @@ const styles = StyleSheet.create({
     }
 });
 
-export default PlayersDetails;
+export default ProfileScreen;
