@@ -6,12 +6,12 @@ import TrainingsScreen from "../screens/TrainingsScreen";
 import GradesScreen from "../screens/GradesScreen";
 import PerformanceDetails from "../screens/PerformanceDetails";
 import ProfileScreen from "../screens/ProfileScreen";
+import TestPlayerScreen from "../screens/TestPlayerScreen";
 /* import RecoverPasswordScreen from '../screens/ChangePasswordsScreen';
 import PlayersScreen from '../screens/PlayersScreen';
 import PlayersDetails from "../screens/PlayersDetails";
 import AssistsScreen from "../screens/AssistsScreen";
 import AssistsScreenM from "../screens/AssistsScreenM";
-import TestPlayerScreen from "../screens/TestPlayerScreen";
 import PlayerAnalysis from "../screens/PlayerAnalysis"; */
 
 const Stack = createStackNavigator();
@@ -64,6 +64,19 @@ export default function LoginNav({ logueado, setLogueado }) {
          options={{ headerShown: false }}
       >
          {props => <PerformanceDetails {...props} setLogueado={setLogueado} logueado={logueado} />}
+      </Stack.Screen>
+      <Stack.Screen
+         name='Notas'
+         options={{
+            headerShown: true,
+            headerStyle: {
+                backgroundColor: '#0078B7', // Nuevo color de fondo para la pantalla de asistencias
+                borderBottomRightRadius: 35,
+                borderBottomLeftRadius: 35,
+            },
+         }}
+      >
+        {props => <TestPlayerScreen {...props} setLogueado={setLogueado} logueado={logueado} />}
       </Stack.Screen>
     </Stack.Navigator>
   );

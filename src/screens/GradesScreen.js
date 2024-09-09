@@ -32,7 +32,7 @@ const GradesScreen = () => {
     console.log('Id del equipo pantalla de mostrar entrenamientos: ' + idJornada);
 
     const goToAssistsM = (idEntrenamiento) => {
-        navigation.navigate('Notas', { idEntrenamiento, idJornada }); // Pasar idEntrenamiento y idJornada
+        navigation.navigate('Notas', { idEntrenamiento }); // Pasar idEntrenamiento y idJornada
     };
 
     const [trainings, setTrainings] = useState([]);
