@@ -32,7 +32,7 @@ const GradesScreen = () => {
     console.log('Id del equipo pantalla de mostrar entrenamientos: ' + idJornada);
 
     const goToAssistsM = (idEntrenamiento) => {
-        navigation.navigate('Modificar asistencia', { idEntrenamiento, idJornada }); // Pasar idEntrenamiento y idJornada
+        navigation.navigate('Notas', { idEntrenamiento, idJornada }); // Pasar idEntrenamiento y idJornada
     };
 
     const [trainings, setTrainings] = useState([]);
@@ -81,12 +81,18 @@ const GradesScreen = () => {
     )
 
     return (
-        <View style={styles.container}>
+        <ScrollView style={styles.container}
+
+            refreshControl={
+                <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="white" colors={['white', 'white', 'white']}
+                    progressBackgroundColor="#020887" />
+            }
+        >
             <Text style={styles.headerText}>Entrenamientos</Text>
             <View style={styles.infoRowTree}>
                 <Ionicons name="football" size={35} color="black" />
                 <Text style={styles.subHeaderText}>
-                    Aquí puedes elegir entre los entrenamientos de los ultimos meses, para que puedas revisar us notas.
+                    Aquí puedes elegir entre los entrenamientos de los ultimos meses, para que puedas revisar tus notas.
                 </Text>
             </View>
             {loading ? (
@@ -94,10 +100,6 @@ const GradesScreen = () => {
             ) : response ? (
                 <ScrollView
                     style={styles.scrollContainer}
-                    refreshControl={
-                        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="white" colors={['white', 'white', 'white']}
-                            progressBackgroundColor="#020887" />
-                    }
                 >
                     {trainings.map((item, index) => (
                         <TrainingCard
@@ -125,7 +127,7 @@ const GradesScreen = () => {
                     </View>
                 </ScrollView>
             )}
-        </View>
+        </ScrollView>
     );
 };
 

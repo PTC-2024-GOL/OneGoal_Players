@@ -11,7 +11,7 @@ import { PieChart } from 'react-native-gifted-charts';
 import { useFocusEffect } from "@react-navigation/native";
 import fetchData from '../../api/components';
 import { SERVER_URL } from "../../api/constantes";
-import { useNavigation } from '@react-navigation/native'; 
+import { useNavigation } from '@react-navigation/native';
 
 import logo from '../../assets/gol_blanco 2.png';
 const { width, height } = Dimensions.get('window');
@@ -23,9 +23,38 @@ const HomeScreen = ({ logueado, setLogueado }) => {
     const [refreshing, setRefreshing] = useState(false);
     const [centerText, setCenterText] = useState("Selecciona un segmento");
     const [foto, setFoto] = useState("../../assets/man.png");
-    
-  const navigation = useNavigation(); // Obtiene el objeto de navegación
+    //Estados para almacenar los datos
+    const [stats, setStats] = useState({
+        goles: " ",
+        asistencias: " ",
+        partidos: " ",
+    });
 
+    const navigation = useNavigation(); // Obtiene el objeto de navegación
+
+
+    //Leer las estadisticas que tiene el jugador
+    const readStats = async () => {
+        try {
+            const data = await fetchData(USER_API, "readOneStats");
+            const profileData = data.dataset;
+            setStats({
+                goles: profileData.TOTAL_GOLES,
+                asistencias: profileData.TOTAL_ASISTENCIAS,
+                partidos: profileData.TOTAL_PARTIDOS,
+            });
+            console.log(data.dataset);
+        } catch (error) {
+            console.log(error);
+            setStats({
+                goles: " ",
+                asistencias: " ",
+                partidos: " ",
+            });
+        } finally {
+            console.log("Petición hecha");
+        }
+    };
 
     //Obtiene la información del usuario desde la API
     const getUser = async () => {
@@ -47,8 +76,8 @@ const HomeScreen = ({ logueado, setLogueado }) => {
     const handleProfile = () => {
         navigation.navigate('LoginNav', {
             screen: 'Profile'
-          });
-      };
+        });
+    };
 
     // Datos para la gráfica circular
     const pieData = [
@@ -62,6 +91,7 @@ const HomeScreen = ({ logueado, setLogueado }) => {
     useEffect(() => {
         const initializeApp = async () => {
             await getUser();
+            await readStats();
         };
         initializeApp();
     }, []);
@@ -70,6 +100,7 @@ const HomeScreen = ({ logueado, setLogueado }) => {
         useCallback(() => {
             const initializeApp = async () => {
                 await getUser();
+                await readStats();
             };
             initializeApp();
         }, [])
@@ -78,6 +109,7 @@ const HomeScreen = ({ logueado, setLogueado }) => {
     const onRefresh = useCallback(async () => {
         setRefreshing(true);
         await getUser();
+        await readStats();
         // Aquí se llamarán las funciones necesarias para refrescar la información
         setRefreshing(false);
     }, []);
@@ -87,7 +119,7 @@ const HomeScreen = ({ logueado, setLogueado }) => {
             style={styles.container}
             refreshControl={
                 <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="white" colors={['white', 'white', 'white']}
-                progressBackgroundColor="#020887" />}
+                    progressBackgroundColor="#020887" />}
         >
             <LinearGradient colors={['#F2F7FF', '#F2F7FF']} style={styles.linearGradient}>
                 {/* Imagen Superior con Texto y Buscador */}
@@ -163,21 +195,21 @@ const HomeScreen = ({ logueado, setLogueado }) => {
                     <Surface style={[styles.surface, { backgroundColor: '#020887' }]} elevation={5}>
                         <View style={styles.statBox}>
                             <MaterialCommunityIcons name="soccer-field" size={24} color="white" />
-                            <Text style={styles.statValue}>10</Text>
+                            <Text style={styles.statValue}>{stats.partidos}</Text>
                             <Text style={styles.statLabel}>Total partidos</Text>
                         </View>
                     </Surface>
                     <Surface style={[styles.surface, { backgroundColor: '#5209B0' }]} elevation={5}>
                         <View style={styles.statBox}>
                             <MaterialCommunityIcons name="soccer" size={24} color="white" />
-                            <Text style={styles.statValue}>15</Text>
+                            <Text style={styles.statValue}>{stats.goles}</Text>
                             <Text style={styles.statLabel}>Total goles</Text>
                         </View>
                     </Surface>
                     <Surface style={[styles.surface, { backgroundColor: '#020887' }]} elevation={5}>
                         <View style={styles.statBox}>
                             <MaterialCommunityIcons name="shoe-cleat" size={24} color="white" />
-                            <Text style={styles.statValue}>10</Text>
+                            <Text style={styles.statValue}>{stats.asistencias}</Text>
                             <Text style={styles.statLabel}>Total asistencias</Text>
                         </View>
                     </Surface>
