@@ -4,6 +4,9 @@ import {useCallback, useState} from "react";
 import {Card, Chip} from "react-native-paper";
 import Fonts from "../../fonts/fonts";
 import Performance from "../components/PerformanceComponent/Performance";
+import {SERVER_URL} from "../../api/constantes";
+import Mood from "../components/PerformanceComponent/Mood";
+import fetchData from "../../api/components";
 
 const width = Dimensions.get('window').width;
 const height = Dimensions.get('window').height;
@@ -11,52 +14,92 @@ const height = Dimensions.get('window').height;
 const PerformanceDetails = () => {
     Fonts();
     const [activeChip, setActiveChip] = useState('Rendimiento');
+    const [activeSection, setActiveSection] = useState('Rendimiento');
+    const [performanceData, setPerformanceData] = useState([]);
+    const [MoodData, setMoodData] = useState([]);
     const navigation = useNavigation();
     const route = useRoute();
-    const { idPartido } = route.params;
+    const { data } = route.params;
+    let idJugador = data.id_jugador;
+    let idPartido = data.id_partido;
+
+    // URL de la API para participaciones
+    const PARTICIPATION_API = 'services/players/participaciones_partidos.php';
+
+    const fillParticipationDetail = async () => {
+        const form = new FormData();
+        form.append('idPartido', idPartido);
+        form.append('idJugador', idJugador);
+
+        const data = await fetchData(PARTICIPATION_API, 'readOne', form);
+
+        if(data.status) {
+            setPerformanceData(data.dataset);
+        }else {
+            console.log('Algo paso')
+        }
+    }
+
+    const changeComponents = (section) => {
+        // Manejo para el cambio de pantalla
+        setActiveSection(section);
+        // Manejo para el estilo de los chips
+        setActiveChip(section);
+    };
 
     useFocusEffect(
         useCallback(()=>{
-
-        },[])
+            fillParticipationDetail();
+            console.log(performanceData)
+        },[activeSection, idPartido])
     )
+
+    //Manejo para el cambio de sub pantallas
+    let component;
+    if (activeSection === 'Rendimiento') {
+        component = <Performance player={performanceData}/>
+    } else {
+        component = <Mood/>
+    }
 
     return(
         <View style={styles.container}>
             <View style={styles.backgroundHeader}>
-                <Text style={styles.date}>14 de noviembre de 2024</Text>
+                <Text style={styles.date}>{data.fecha}</Text>
                 <View style={styles.card}>
                     <View style={styles.row}>
                         <View style={styles.col}>
-                            <Image style={styles.img} source={require('../../assets/gol.png')}/>
-                            <Text style={styles.teamName}>Un gol para El Salvador</Text>
+                            <Image style={styles.img} source={{uri: `${SERVER_URL}images/equipos/${data.logo_equipo}`}}/>
+                            <Text style={styles.teamName}>{data.nombre_equipo}</Text>
                         </View>
                         <View style={styles.col}>
                             <View style={styles.cont1}>
-                                <Text style={styles.text1}>Visitante</Text>
+                                <Text style={styles.text1}>{data.localidad_partido}</Text>
                             </View>
-                            <Text style={styles.text2}>3:2</Text>
-                            <Text style={{marginTop: -10, fontFamily: 'Poppins_500Medium', fontSize: 15, color: '#10b81a'}}>Victoria</Text>
+                            <Text style={styles.text2}>{data.resultado_partido}</Text>
+                            <Text style={{marginTop: -10, fontFamily: 'Poppins_500Medium', fontSize: 15, color: '#10b81a'}}>{data.tipo_resultado_partido}</Text>
                         </View>
                         <View style={styles.col}>
-                            <Image style={styles.img} source={require('../../assets/gol.png')}/>
-                            <Text style={styles.rivalName}>Monaco</Text>
+                            <Image style={styles.img} source={{uri: `${SERVER_URL}images/rivales/${data.logo_rival}`}}/>
+                            <Text style={styles.rivalName}>{data.nombre_rival}</Text>
                         </View>
                     </View>
                 </View>
             </View>
             <View style={styles.rowButton}>
                 <Chip
-                    style={{backgroundColor: activeChip === 'Rendimiento' ? '#03045E' : '#03045E',}}
+                    onPress={() => changeComponents('Rendimiento')}
+                    style={{backgroundColor: activeChip === 'Rendimiento' ? '#03045E' : '#e6e3e3',}}
                     textStyle={{color: activeChip === 'Rendimiento' ? 'white' : '#757272', fontFamily: 'Poppins_400Regular'}}>Rendimiento
                 </Chip>
                 <Chip
+                    onPress={() => changeComponents('Animo')}
                     style={{backgroundColor: activeChip === 'Animo' ? '#03045E' : '#e6e3e3',}}
                     textStyle={{color: activeChip === 'Animo' ? 'white' : '#757272', fontFamily: 'Poppins_400Regular'}}>Estado de ánimo
                 </Chip>
             </View>
             <ScrollView style={styles.scroll}>
-                <Performance/>
+                {component}
             </ScrollView>
         </View>
     );
@@ -81,12 +124,15 @@ const styles = StyleSheet.create({
         padding: 15,
         backgroundColor: '#fff',
         borderRadius: 20,
-        elevation: 10
+        elevation: 10,
+        height: height * 0.2,
+        display: "flex",
+        justifyContent: "center"
     },
     row: {
         flexDirection: "row",
         flexWrap: "wrap",
-        justifyContent: "space-between"
+        justifyContent: "space-between",
     },
     col: {
         flexDirection: "column",
@@ -101,8 +147,8 @@ const styles = StyleSheet.create({
         fontSize: 18
     },
     img: {
-        width: 80,
-        height: 80,
+        width: 70,
+        height: 70,
         borderRadius: 100
     },
     rivalName: {
@@ -133,14 +179,14 @@ const styles = StyleSheet.create({
         fontFamily: 'Poppins_600SemiBold',
     },
     rowButton: {
-        marginTop: 105,
-        marginBottom: 20,
+        marginTop: height * 0.12,
+        marginBottom: 25,
         flexDirection: "row",
         gap: 20,
         justifyContent: "center"
     },
     scroll: {
-        marginHorizontal: 25
+        marginHorizontal: 25,
     },
 });
 

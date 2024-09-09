@@ -2,12 +2,14 @@ import { StyleSheet, View, Text, Alert, TouchableOpacity, SafeAreaView } from "r
 import { LinearGradient } from "expo-linear-gradient";
 import { Avatar, Chip } from "react-native-paper";
 import { useCallback, useState } from "react";
+import { useNavigation } from '@react-navigation/native'; // Importa useNavigation
 import Entypo from "@expo/vector-icons/Entypo";
 import { useFocusEffect, useRoute } from "@react-navigation/native"; // Importa useRoute
 import InfoPlayers from "../components/playersComponent/InfoPlayer";
 import TrainingPlayer from "../components/playersComponent/TrainingPlayer";
 //import AssistancePlayer from "../components/playersComponent/AssistancePlayer";
 import fetchData from "../../api/components";
+import AlertComponent from '../components/AlertComponent';
 
 import { SERVER_URL } from "../../api/constantes";
 
@@ -16,10 +18,16 @@ const ProfileScreen = ({ logueado, setLogueado }) => {
     const [activeSection, setActiveSection] = useState('informacion');
     // Manejo para el estilo de los botones.
     const [activeChip, setActiveChip] = useState('informacion');
+    const [alertVisible, setAlertVisible] = useState(false);
+    const [alertType, setAlertType] = useState(1);
+    const [alertMessage, setAlertMessage] = useState('');
+    const [alertCallback, setAlertCallback] = useState(null);
     const [players, setPlayers] = useState([]);
     const API_PLAYERS = 'services/players/jugadores.php';
     const API_ESTADO_FISICO = 'services/players/estado_fisico_jugador.php';
     const [estadoFisico, setEstadoFisico] = useState([]);
+
+    const navigation = useNavigation();
 
 
     // Función que permite el cambio de pantallas, recibe un parámetro (opciones de los botones (informacion, rendimiento o asistencias))
@@ -47,14 +55,31 @@ const ProfileScreen = ({ logueado, setLogueado }) => {
         try {
             const data = await fetchData(API_PLAYERS, "logOut");
             if (data.status) {
-                setLogueado(false)
+                setLogueado(false);
+                setAlertType(1);
+                setAlertMessage(`${data.message}`);
+                setAlertCallback(() => () => navigation.navigate('LoginNav', {
+                    screen: 'LoginScreen'
+                }));
+                setAlertVisible(true);
             } else {
-                Alert.alert("Error sesión", data.error);
+                setAlertType(2);
+                setAlertMessage(`Error sesión: ${data.error}`);
+                setAlertCallback(null);
+                setAlertVisible(true);
             }
         } catch (error) {
-            console.log("Error: ", error);
-            Alert.alert("Error sesión", error);
+            setAlertType(2);
+            setAlertMessage(`Error sesión: ${data.error}`);
+            setAlertCallback(null);
+            setAlertVisible(true);
         }
+    };
+
+
+    const handleAlertClose = () => {
+        setAlertVisible(false);
+        if (alertCallback) alertCallback();
     };
 
     //Peticion a la api para traerme informacion sobre el jugador
@@ -83,12 +108,6 @@ const ProfileScreen = ({ logueado, setLogueado }) => {
         case 'informacion':
             contentComponent = <InfoPlayers informationPlayer={players} estadoFisico={estadoFisico} />;
             break;
-        case 'rendimiento':
-            contentComponent = <TrainingPlayer />;
-            break;
-        case 'asistencias':
-            //contentComponent = <AssistancePlayer />;
-            break;
         default:
             contentComponent = null;
     }
@@ -113,17 +132,13 @@ const ProfileScreen = ({ logueado, setLogueado }) => {
                     onPress={() => changeScreen('informacion')}
                     textStyle={{ color: activeChip === 'informacion' ? 'white' : '#9A9A9A' }}>Información
                 </Chip>
-                <Chip
-                    style={{ backgroundColor: activeChip === 'rendimiento' ? '#03045E' : '#F2EEEF', }}
-                    onPress={() => changeScreen('rendimiento')}
-                    textStyle={{ color: activeChip === 'rendimiento' ? 'white' : '#9A9A9A' }}>Rendimiento
-                </Chip>
-                <Chip
-                    style={{ backgroundColor: activeChip === 'asistencias' ? '#03045E' : '#F2EEEF', }}
-                    onPress={() => changeScreen('asistencias')}
-                    textStyle={{ color: activeChip === 'asistencias' ? 'white' : '#9A9A9A' }}>Asistencias
-                </Chip>
             </View>
+            <AlertComponent
+                visible={alertVisible}
+                type={alertType}
+                message={alertMessage}
+                onClose={handleAlertClose}
+            />
 
             {/*INFORMACION SELECCIONADA*/}
             {contentComponent}
