@@ -72,10 +72,10 @@ const PerformanceScreen = ({ logueado, setLogueado }) => {
         }
     }
 
-    const goToPerformanceDetails = (idPartido) => {
+    const goToPerformanceDetails = (data) => {
         navigation.navigate('LoginNav', {
             screen: 'RendimientoDetalle',
-            params: {idPartido}
+            params: {data}
         });
     };
 
@@ -115,10 +115,7 @@ const PerformanceScreen = ({ logueado, setLogueado }) => {
                                 matches.map((item, index) => (
                                     <MatchesCard
                                         key={index}
-                                        id={item.id_partido}
-                                        teamName={item.nombre_equipo}
-                                        rivalName={item.nombre_rival}
-                                        date={item.fecha}
+                                        data={item}
                                         teamImg={`${SERVER_URL}images/equipos/${item.logo_equipo}`}
                                         rivalImg={`${SERVER_URL}images/rivales/${item.logo_rival}`}
                                         goToScreen={goToPerformanceDetails}

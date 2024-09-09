@@ -1,20 +1,29 @@
-import {Text, View, StyleSheet, Dimensions, ScrollView} from "react-native";
+import {Text, View, StyleSheet, Dimensions, ScrollView, Image} from "react-native";
 import Fonts from "../../../fonts/fonts";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
-
 const width = Dimensions.get('window').width;
 const height = Dimensions.get('window').height;
 
-const Performance = () => {
+const Performance = ({player}) => {
     Fonts();
+
+    let juego;
+    if(player.titular === '1') {
+       juego = 'Titular'
+    } else {
+        juego ='Suplente'
+    }
+
     return(
         <View>
             <View style={styles.rowContainer}>
                 <View style={styles.circle}></View>
-                <Text style={{fontFamily: 'Poppins_500Medium'}}>Titular</Text>
+                <Text style={{fontFamily: 'Poppins_500Medium'}}>{juego}</Text>
             </View>
             <View style={styles.row}>
-                <Text style={styles.note}>9.5</Text>
+                <View style={styles.bigCircle}>
+                    <Text style={styles.note}>{player.puntuacion}</Text>
+                </View>
             </View>
             <View style={styles.row}>
                 <Icon name="clipboard-text-outline" size={20}/>
@@ -25,25 +34,39 @@ const Performance = () => {
                     <View style={styles.card1}>
                         <Icon name='soccer' size={30} color={'#fff'}/>
                         <View style={styles.col}>
-                            <Text style={styles.title1}>2</Text>
+                            <Text style={styles.title1}>{player.goles}</Text>
                             <Text style={styles.text1}>Goles</Text>
                         </View>
                     </View>
                     <View style={styles.card2}>
                         <Icon name='clock-time-four-outline' size={30} color={'#fff'}/>
                         <View style={styles.col}>
-                            <Text style={styles.title1}>25</Text>
+                            <Text style={styles.title1}>{player.minutos_jugados}</Text>
                             <Text style={styles.text1}>Minutos jugados</Text>
                         </View>
                     </View>
                     <View style={styles.card3}>
                         <Icon name='account-check-outline' size={30} color={'#fff'}/>
                         <View style={styles.col}>
-                            <Text style={styles.title1}>2</Text>
+                            <Text style={styles.title1}>{player.asistencias}</Text>
                             <Text style={styles.text1}>Asistencias</Text>
                         </View>
                     </View>
                 </ScrollView>
+            </View>
+            <Text style={styles.card}>Tarjetas asignadas</Text>
+            <View style={styles.rowContainer}>
+                <Icon name="cards" size={30} color={'#e60404'}/>
+                <Text style={styles.cardText}>No tuviste ninguna tarjeta roja</Text>
+            </View>
+            <View style={styles.rowContainer}>
+                <Icon name="cards" size={30} color={'#f8d852'}/>
+                <Text style={styles.cardText}>No tuviste ninguna tarjeta roja</Text>
+            </View>
+            <Text style={styles.cardGol}>Tipos de goles</Text>
+            <View style={styles.rowContainerGol}>
+                <Icon name="soccer" size={30}/>
+                <Text style={styles.cardText}>No tuviste ningún gol</Text>
             </View>
         </View>
 
@@ -63,12 +86,18 @@ const styles = StyleSheet.create({
         alignItems: "center",
         gap: 8
     },
-    note: {
+    bigCircle: {
         backgroundColor:'#EDF2FB',
-        padding: 20,
-        borderRadius: 100/2,
-        fontFamily: 'Poppins_500Medium',
-        fontSize: 30
+        borderRadius: 100,
+        height: 100,
+        width: 100,
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center"
+    },
+    note: {
+        fontFamily: 'Poppins_600SemiBold',
+        fontSize: 25,
     },
     row: {
         flexDirection: "row",
@@ -78,20 +107,20 @@ const styles = StyleSheet.create({
         marginTop: 10
     },
     card1: {
-        width: 150,
+        width: 140,
         padding: 10,
         backgroundColor: '#5E50FD',
         borderRadius: 10
     },
     card2: {
-        width: 150,
+        width: 140,
         padding: 10,
         backgroundColor: '#AC74F2',
         marginHorizontal: 10,
         borderRadius: 10
     },
     card3: {
-        width: 150,
+        width: 140,
         padding: 10,
         backgroundColor: '#5E50FD',
         borderRadius: 10
@@ -103,7 +132,7 @@ const styles = StyleSheet.create({
     },
     rowCard: {
         marginTop: 20,
-        marginBottom: 20
+        marginBottom: 10
     },
     title1:{
         color: '#fff',
@@ -114,6 +143,27 @@ const styles = StyleSheet.create({
         color: '#fff',
         fontFamily: 'Poppins_300Light',
         marginTop: -10
-    }
+    },
+    card: {
+        fontFamily: 'Poppins_500Medium',
+        marginBottom: 10,
+        marginTop: 10
+    },
+    cardText: {
+        fontFamily: 'Poppins_400Regular',
+        marginBottom: 10
+    },
+    cardGol: {
+        fontFamily: 'Poppins_500Medium',
+        marginBottom: 10,
+        marginTop: 15
+    },
+    rowContainerGol: {
+        flexDirection: "row",
+        flexWrap: "wrap",
+        alignItems: "center",
+        gap: 8,
+        marginBottom: 30
+    },
 })
 export default Performance;
