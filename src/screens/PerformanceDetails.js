@@ -1,8 +1,9 @@
-import {View, Text, StyleSheet, Dimensions, Image} from "react-native";
+import {View, Text, StyleSheet, Dimensions, Image, ScrollView} from "react-native";
 import {useFocusEffect, useNavigation, useRoute} from "@react-navigation/native";
 import {useCallback, useState} from "react";
 import {Card, Chip} from "react-native-paper";
 import Fonts from "../../fonts/fonts";
+import Performance from "../components/PerformanceComponent/Performance";
 
 const width = Dimensions.get('window').width;
 const height = Dimensions.get('window').height;
@@ -54,6 +55,9 @@ const PerformanceDetails = () => {
                     textStyle={{color: activeChip === 'Animo' ? 'white' : '#757272', fontFamily: 'Poppins_400Regular'}}>Estado de ánimo
                 </Chip>
             </View>
+            <ScrollView style={styles.scroll}>
+                <Performance/>
+            </ScrollView>
         </View>
     );
 };
@@ -61,7 +65,8 @@ const PerformanceDetails = () => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#fff'
+        backgroundColor: '#fff',
+        paddingBottom: 100
     },
     backgroundHeader: {
         backgroundColor: '#334195',
@@ -76,7 +81,7 @@ const styles = StyleSheet.create({
         padding: 15,
         backgroundColor: '#fff',
         borderRadius: 20,
-        elevation: 50
+        elevation: 10
     },
     row: {
         flexDirection: "row",
@@ -103,13 +108,13 @@ const styles = StyleSheet.create({
     rivalName: {
         marginTop: 10,
         width: 100,
-        fontFamily: 'Poppins_600SemiBold',
+        fontFamily: 'Poppins_400Regular',
         textAlign: "center",
     },
     teamName: {
         marginTop: 10,
         width: 100,
-        fontFamily: 'Poppins_600SemiBold',
+        fontFamily: 'Poppins_400Regular',
         textAlign: "center"
     },
     cont1: {
@@ -128,11 +133,14 @@ const styles = StyleSheet.create({
         fontFamily: 'Poppins_600SemiBold',
     },
     rowButton: {
-        marginTop: 100,
+        marginTop: 105,
         marginBottom: 20,
         flexDirection: "row",
         gap: 20,
         justifyContent: "center"
+    },
+    scroll: {
+        marginHorizontal: 25
     },
 });
 
