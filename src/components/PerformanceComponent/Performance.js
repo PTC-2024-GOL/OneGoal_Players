@@ -4,7 +4,7 @@ import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 const width = Dimensions.get('window').width;
 const height = Dimensions.get('window').height;
 
-const Performance = ({player}) => {
+const Performance = ({player, goles, redCard, yellowCard}) => {
     Fonts();
 
     let juego;
@@ -57,16 +57,36 @@ const Performance = ({player}) => {
             <Text style={styles.card}>Tarjetas asignadas</Text>
             <View style={styles.rowContainer}>
                 <Icon name="cards" size={30} color={'#e60404'}/>
-                <Text style={styles.cardText}>No tuviste ninguna tarjeta roja</Text>
+                {
+                    redCard != null ? (
+                        <Text style={styles.cardText}>Tuviste {redCard.totalRojas} tarjeta/s roja/s</Text>
+                    ):(
+                        <Text style={styles.cardText}>No tuviste ninguna tarjeta roja</Text>
+                    )
+                }
             </View>
             <View style={styles.rowContainer}>
                 <Icon name="cards" size={30} color={'#f8d852'}/>
-                <Text style={styles.cardText}>No tuviste ninguna tarjeta roja</Text>
+                {
+                    yellowCard != null ? (
+                        <Text style={styles.cardText}>Tuviste {yellowCard.totalAmarillas} tarjeta/s amarilla/s </Text>
+                    ):(
+                        <Text style={styles.cardText}>No tuviste ninguna tarjeta amarilla</Text>
+                    )
+                }
             </View>
             <Text style={styles.cardGol}>Tipos de goles</Text>
             <View style={styles.rowContainerGol}>
                 <Icon name="soccer" size={30}/>
-                <Text style={styles.cardText}>No tuviste ningún gol</Text>
+                {
+                    goles.length > 0 ? (
+                        goles.map((item, index) => (
+                            <Text style={styles.cardText}>{item.cantidad_tipo_gol} {item.nombre_tipo_gol}</Text>
+                        ))
+                    ): (
+                        <Text style={styles.cardText}>El jugador no tuvo goles en este partido</Text>
+                    )
+                }
             </View>
         </View>
 

@@ -17,6 +17,9 @@ const PerformanceDetails = () => {
     const [activeSection, setActiveSection] = useState('Rendimiento');
     const [performanceData, setPerformanceData] = useState([]);
     const [MoodData, setMoodData] = useState([]);
+    const [goles, setGoles] = useState([]);
+    const [yellowCard, setYellowCard] = useState(0);
+    const [redCard, setRedCard] = useState(0);
     const navigation = useNavigation();
     const route = useRoute();
     const { data } = route.params;
@@ -25,6 +28,8 @@ const PerformanceDetails = () => {
 
     // URL de la API para participaciones
     const PARTICIPATION_API = 'services/players/participaciones_partidos.php';
+    const GOLES_API = 'services/players/detalles_goles.php';
+    const AMONESTACIONES_API = 'services/players/detalles_amonestaciones.php';
 
     const fillParticipationDetail = async () => {
         const form = new FormData();
@@ -47,17 +52,57 @@ const PerformanceDetails = () => {
         setActiveChip(section);
     };
 
+    const fillGoles = async () => {
+        const form = new FormData();
+        form.append('idParticipacion', performanceData.id_participacion);
+
+        const data = await fetchData(GOLES_API, 'readAllByIdParticipacion', form);
+        if(data.status){
+            setGoles(data.dataset);
+        }else {
+            console.log(data.error);
+        }
+    }
+
+    const fillYellowCards = async () => {
+        const form = new FormData();
+        form.append('idParticipacion', performanceData.id_participacion);
+
+        const data = await fetchData(AMONESTACIONES_API, 'readTarjetaAmarillas', form);
+
+        if(data.status){
+            setYellowCard(data.dataset);
+        }else{
+            console.log(data.error)
+        }
+    }
+
+    const fillRedCards = async () => {
+        const form = new FormData();
+        form.append('idParticipacion', performanceData.id_participacion);
+
+        const data = await fetchData(AMONESTACIONES_API, 'readTarjetaRojas', form);
+
+        if(data.status){
+            setRedCard(data.dataset);
+        }else{
+            console.log(data.error)
+        }
+    }
+
     useFocusEffect(
         useCallback(()=>{
             fillParticipationDetail();
-            console.log(performanceData)
+            fillGoles();
+            fillYellowCards();
+            fillRedCards();
         },[activeSection, idPartido])
     )
 
     //Manejo para el cambio de sub pantallas
     let component;
     if (activeSection === 'Rendimiento') {
-        component = <Performance player={performanceData}/>
+        component = <Performance player={performanceData} goles={goles} redCard={redCard} yellowCard={yellowCard}/>
     } else {
         component = <Mood/>
     }
