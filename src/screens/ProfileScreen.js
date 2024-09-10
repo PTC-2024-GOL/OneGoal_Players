@@ -50,17 +50,21 @@ const ProfileScreen = ({ logueado, setLogueado }) => {
         }
     }
 
+    //Peticion a la api para traerme informacion sobre el estado fisico del jugador
+    const logout = async () => {
+        setLogueado(false);
+        navigation.navigate('WelcomeScreen');
+      };
+      
+
     // Manejo de cierre de sesión
     const handleLogOut = async () => {
         try {
             const data = await fetchData(API_PLAYERS, "logOut");
             if (data.status) {
-                setLogueado(false);
                 setAlertType(1);
                 setAlertMessage(`${data.message}`);
-                setAlertCallback(() => () => navigation.navigate('LoginNav', {
-                    screen: 'LoginScreen'
-                }));
+                setAlertCallback(() => logout);
                 setAlertVisible(true);
             } else {
                 setAlertType(2);

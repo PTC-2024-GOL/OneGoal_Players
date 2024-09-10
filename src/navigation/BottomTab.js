@@ -37,6 +37,10 @@ export default function BottomTab({ logueado, setLogueado }) {
     const RenderMedicalHistory = props => (
         <MedicalHistory {...props} setLogueado={setLogueado} logueado={logueado} />
     );
+    // Función para renderizar HomeScreen con props
+    const RenderLoginNav = props => (
+        <LoginNav {...props} setLogueado={setLogueado} logueado={logueado} />
+    );
     return (
         <Tab.Navigator
             initialRouteName="Inicio"
@@ -122,7 +126,7 @@ export default function BottomTab({ logueado, setLogueado }) {
             {/*Accedemos al Stack navigation que se encuentra en LoginNav  */}
             <Tab.Screen
                 name="LoginNav"
-                component={LoginNav}
+                component={RenderLoginNav}
                 //Escondemos la opcion para que no aparezca en el BottomTab
                 options={({ route }) => ({
                     tabBarButton: () => null,
