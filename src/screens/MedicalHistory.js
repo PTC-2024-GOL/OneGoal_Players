@@ -1,18 +1,33 @@
-import React from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Image, Dimensions } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Image, Dimensions, Modal } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
- 
+import { LinearGradient } from 'expo-linear-gradient';
+
 const windowWidth = Dimensions.get('window').width;
- 
+const windowHeight = Dimensions.get('window').height;
+
 const MedicalHistory = () => {
-  const injuries = [
-    { part: 'Tren superior', days: 4 },
-    { part: 'Tren inferior', days: 10 },
-    { part: 'Tren superior', days: 25 },
-    { part: 'Tren inferior', days: 3 },
-    { part: 'Tren superior', days: 8 },
-  ];
- 
+  const [modalVisible, setModalVisible] = useState(false);
+  const [selectedInjury, setSelectedInjury] = useState(null);
+  const [returnModalVisible, setReturnModalVisible] = useState(false);
+  const [injuries, setInjuries] = useState([
+    { part: 'Tren superior', days: 4, injuryDate: '8 de noviembre 2023', returnDate: '12 de noviembre 2023' },
+    { part: 'Tren inferior', days: 10, injuryDate: '10 de noviembre 2022', returnDate: '20 de noviembre 2022' },
+    { part: 'Tren superior', days: 25, injuryDate: '1 de diciembre 2023', returnDate: '26 de diciembre 2023' },
+    { part: 'Tren inferior', days: 3, injuryDate: '5 de enero 2024', returnDate: '8 de enero 2024' },
+    { part: 'Tren superior', days: 8, injuryDate: '15 de febrero 2024', returnDate: '23 de febrero 2024' },
+  ]);
+
+  const openModal = (injury) => {
+    setSelectedInjury(injury);
+    setModalVisible(true);
+  };
+
+  const openReturnModal = (injury) => {
+    setSelectedInjury(injury);
+    setReturnModalVisible(true);
+  };
+
   return (
     <View style={styles.container}>
       <Text style={styles.headerText}>Historial Médico</Text>
@@ -41,20 +56,98 @@ const MedicalHistory = () => {
             <Text style={styles.injuryText}>{injury.part}</Text>
             <Text style={styles.injuryText}>{injury.days}</Text>
             <View style={styles.iconContainer}>
-              <TouchableOpacity style={[styles.iconButton, styles.redButton]}>
+              <TouchableOpacity style={[styles.iconButton, styles.redButton]} onPress={() => openModal(injury)}>
                 <Image source={require('../../assets/lesion.png')} style={styles.icon} />
               </TouchableOpacity>
-              <TouchableOpacity style={[styles.iconButton, styles.greenButton]}>
+              <TouchableOpacity style={[styles.iconButton, styles.greenButton]} onPress={() => openReturnModal(injury)}>
                 <Image source={require('../../assets/pelota.png')} style={styles.icon} />
               </TouchableOpacity>
             </View>
           </View>
         ))}
       </ScrollView>
+
+      {/* Modal de Registro */}
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <View style={styles.modalCenter}>
+          <View style={styles.modalContainer}>
+            <LinearGradient colors={['#020887', '#13071E']} style={styles.headerModal}>
+              <View style={styles.modalRow}>
+                <Image style={styles.modalImage} source={require('../../assets/gol_blanco 2.png')} />
+                <Text style={styles.modalTitle}>Registro</Text>
+              </View>
+            </LinearGradient>
+
+            <ScrollView>
+              <View style={styles.modalContent}>
+                <View style={styles.dateCard}>
+                  <Text style={styles.dateText}>{selectedInjury?.injuryDate}</Text>
+                  <Text style={styles.dateLabel}>Fecha de la lesión</Text>
+                </View>
+                <View style={styles.dateCard}>
+                  <Text style={styles.dateText}>{selectedInjury?.returnDate}</Text>
+                  <Text style={styles.dateLabel}>Fecha de regreso</Text>
+                </View>
+              </View>
+            </ScrollView>
+
+            <TouchableOpacity
+              style={styles.closeButton}
+              onPress={() => setModalVisible(false)}
+            >
+              <Text style={styles.closeButtonText}>Cerrar</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Modal de Retorno */}
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={returnModalVisible}
+        onRequestClose={() => setReturnModalVisible(false)}
+      >
+        <View style={styles.modalCenter}>
+          <View style={styles.modalContainer}>
+            <LinearGradient colors={['#020887', '#13071E']} style={styles.headerModal}>
+              <View style={styles.modalRow}>
+                <Image style={styles.modalImage} source={require('../../assets/gol_blanco 2.png')} />
+                <Text style={styles.modalTitle}>Retorno</Text>
+              </View>
+            </LinearGradient>
+
+            <ScrollView>
+              <View style={styles.modalContent}>
+                <View style={styles.dateCard}>
+                  <Text style={styles.dateText}>{selectedInjury?.returnDate}</Text>
+                  <Text style={styles.dateLabel}>Retorno a entreno</Text>
+                </View>
+                <View style={styles.dateCard}>
+                  <Text style={styles.dateText}>{selectedInjury?.returnDate}</Text>
+                  <Text style={styles.dateLabel}>Retorno a partido</Text>
+                </View>
+              </View>
+            </ScrollView>
+
+            <TouchableOpacity
+              style={styles.closeButton}
+              onPress={() => setReturnModalVisible(false)}
+            >
+              <Text style={styles.closeButtonText}>Cerrar</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 };
- 
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -146,6 +239,82 @@ const styles = StyleSheet.create({
     height: 20,
     resizeMode: 'contain',
   },
+  modalCenter: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  modalContainer: {
+    width: windowWidth * 0.8,
+    backgroundColor: 'white',
+    borderRadius: 20,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  headerModal: {
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    padding: 15,
+  },
+  modalRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  modalImage: {
+    width: 40,
+    height: 40,
+    marginRight: 10,
+  },
+  modalTitle: {
+    color: '#fff',
+    fontSize: 24,
+    fontWeight: 'bold',
+  },
+  modalContent: {
+    padding: 20,
+  },
+  dateCard: {
+    backgroundColor: '#fff',
+    padding: 16,
+    marginVertical: 8,
+    borderRadius: 8,
+    borderStartColor: '#020887',
+    borderStartWidth: 5,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  dateText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#000',
+  },
+  dateLabel: {
+    fontSize: 14,
+    color: '#333',
+  },
+  closeButton: {
+    backgroundColor: '#F44262',
+    padding: 10,
+    borderBottomLeftRadius: 20,
+    borderBottomRightRadius: 20,
+    alignItems: 'center',
+  },
+  closeButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
 });
- 
+
 export default MedicalHistory;
