@@ -53,8 +53,9 @@ const ProfileScreen = ({ logueado, setLogueado }) => {
     //Peticion a la api para traerme informacion sobre el estado fisico del jugador
     const logout = async () => {
         setLogueado(false);
-        navigation.navigate('LoginScreen');
-    }
+        navigation.navigate('WelcomeScreen');
+      };
+      
 
     // Manejo de cierre de sesión
     const handleLogOut = async () => {
@@ -63,7 +64,7 @@ const ProfileScreen = ({ logueado, setLogueado }) => {
             if (data.status) {
                 setAlertType(1);
                 setAlertMessage(`${data.message}`);
-                setAlertCallback(() => () => logout);
+                setAlertCallback(() => logout);
                 setAlertVisible(true);
             } else {
                 setAlertType(2);

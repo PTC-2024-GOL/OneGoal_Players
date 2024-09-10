@@ -179,7 +179,7 @@ const styles = StyleSheet.create({
         elevation: 5,
     },
     date: {
-        fontSize: 16,
+        fontSize: 13.5,
         fontWeight: 'bold',
         marginBottom: 4,
     },
@@ -205,7 +205,7 @@ const styles = StyleSheet.create({
         color: '#000000',
         textDecorationLine: 'underline',
         marginHorizontal: 5,
-        maxWidth: 125
+        maxWidth: windowWidth * 0.27,
     },
     iconButton: {
         backgroundColor: '#090BA0',

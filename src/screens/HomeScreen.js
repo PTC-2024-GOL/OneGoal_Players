@@ -75,7 +75,7 @@ const HomeScreen = ({ logueado, setLogueado }) => {
 
     const handleProfile = () => {
         navigation.navigate('LoginNav', {
-            screen: 'Profile'
+            screen: 'Profile',
         });
     };
 
@@ -142,11 +142,11 @@ const HomeScreen = ({ logueado, setLogueado }) => {
 
                 {/* Sección de Perfil */}
                 <View style={styles.inputContainer}>
-                    <View style={styles.rowContent2}>
-                        <AntDesign name="user" size={24} />
-                        <Text style={styles.label}>Mi perfil</Text>
-                    </View>
                     <View style={styles.infoRow}>
+                        <View style={styles.rowContent2}>
+                            <AntDesign name="user" size={24} />
+                            <Text style={styles.label}>Mi perfil</Text>
+                        </View>
                         <View style={styles.rowContent}>
                             <Image
                                 source={{ uri: foto }} // Reemplaza con la URL de la imagen o usa require para imagen local
@@ -161,32 +161,36 @@ const HomeScreen = ({ logueado, setLogueado }) => {
                         </View>
                     </View>
                 </View>
-                {/* Gráfica de Progreso de Entrenamientos */}
-                <View style={styles.trainingChartContainer}>
-                    <View style={styles.rowContent3}>
-                        <Text style={styles.trainingChartText}>Calificación total de entrenamientos</Text>
+                <View style={styles.centrar}>
+                    <View style={styles.infoRowGraphic}>
+                        {/* Gráfica de Progreso de Entrenamientos */}
+                        <View style={styles.trainingChartContainer}>
+                            <View style={styles.rowContent3}>
+                                <Text style={styles.trainingChartText}>Calificación total de entrenamientos</Text>
+                            </View>
+                            <PieChart
+                                data={pieData}
+                                donut
+                                radius={100}
+                                innerRadius={50}
+                                textColor="black"
+                                textSize={12}
+                                onPress={(index) => {
+                                    setCenterText(index.text || "Selecciona un segmento");
+                                }}
+                                centerLabelComponent={() => {
+                                    return <Text style={{ fontSize: 12 }}>{centerText}</Text>;
+                                }}
+                            />
+                            <Text style={styles.chartPercentage}>Técnicos: 50%</Text>
+                            <Text style={styles.chartPercentage}>Físicos: 20%</Text>
+                            <Text style={styles.chartPercentage}>Tácticos: 15%</Text>
+                            <Text style={styles.chartPercentage}>Psicológicos: 15%</Text>
+                            <TouchableOpacity style={styles.viewtrainingButton}>
+                                <Text style={styles.viewProfileText}>Ver mas detalles</Text>
+                            </TouchableOpacity>
+                        </View>
                     </View>
-                    <PieChart
-                        data={pieData}
-                        donut
-                        radius={100}
-                        innerRadius={50}
-                        textColor="black"
-                        textSize={12}
-                        onPress={(index) => {
-                            setCenterText(index.text || "Selecciona un segmento");
-                        }}
-                        centerLabelComponent={() => {
-                            return <Text style={{ fontSize: 12 }}>{centerText}</Text>;
-                        }}
-                    />
-                    <Text style={styles.chartPercentage}>Técnicos: 50%</Text>
-                    <Text style={styles.chartPercentage}>Físicos: 20%</Text>
-                    <Text style={styles.chartPercentage}>Tácticos: 15%</Text>
-                    <Text style={styles.chartPercentage}>Psicológicos: 15%</Text>
-                    <TouchableOpacity style={styles.viewtrainingButton}>
-                        <Text style={styles.viewProfileText}>Ver mas detalles</Text>
-                    </TouchableOpacity>
                 </View>
 
                 {/* Sección de Estadísticas */}
@@ -367,7 +371,19 @@ const styles = StyleSheet.create({
         borderRadius: 10,
         backgroundColor: "white",
         width: "100%",
-        height: height * 0.13,
+        height: height * 0.18,
+        elevation: 2,
+    },
+    centrar: {
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    infoRowGraphic: {
+        padding: 12,
+        margin: 2,
+        borderRadius: 10,
+        backgroundColor: "white",
+        width: width * 0.9,
         elevation: 2,
     },
     rowContent: {
