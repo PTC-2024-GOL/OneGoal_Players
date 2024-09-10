@@ -48,6 +48,9 @@ const HomeScreen = ({ logueado, setLogueado }) => {
     const [modalVisibleGoals, setModalVisibleGoals] = useState(false);
     const [modalVisibleMatches, setModalVisibleMatches] = useState(false);
     const [modalVisibleAssists, setModalVisibleAssists] = useState(false);
+    const [modalVisibleMinutes, setModalVisibleMinutes] = useState(false);
+    const [modalVisibleYellowCards, setModalVisibleYellowCards] = useState(false);
+    const [modalVisibleRedCards, setModalVisibleRedCards] = useState(false);
 
     const openModalGoals = () => {
         setModalVisibleGoals(true);
@@ -59,6 +62,18 @@ const HomeScreen = ({ logueado, setLogueado }) => {
 
     const openModalAssists = () => {
         setModalVisibleAssists(true);
+    };
+
+    const openModalMinutes = () => {
+        setModalVisibleMinutes(true);
+    };
+
+    const openModalYellowCards = () => {
+        setModalVisibleYellowCards(true);
+    };
+
+    const openModalRedCards = () => {
+        setModalVisibleRedCards(true);
     };
 
     //Leer las estadisticas que tiene el jugador
@@ -252,7 +267,7 @@ const HomeScreen = ({ logueado, setLogueado }) => {
         fillMaxGoals();
         fillMaxAssists();
     }, []);
-    
+
     // Componente para los puntos de la leyenda
     const renderDot = color => {
         return (
@@ -420,21 +435,21 @@ const HomeScreen = ({ logueado, setLogueado }) => {
                 {/* Sección de Estadísticas 2*/}
                 <View style={styles.statsContainer}>
                     <Surface style={[styles.surface, { backgroundColor: '#5209B0' }]} elevation={5}>
-                        <TouchableOpacity style={styles.statBox} onPress={() => openModalMatches()}>
+                        <TouchableOpacity style={styles.statBox} onPress={() => openModalMinutes()}>
                             <MaterialCommunityIcons name="camera-timer" size={24} color="white" />
                             <Text style={styles.statValue}>{stats.minutos}</Text>
                             <Text style={styles.statLabel}>Minutos jugados</Text>
                         </TouchableOpacity>
                     </Surface>
                     <Surface style={[styles.surface, { backgroundColor: '#dac002' }]} elevation={5}>
-                        <TouchableOpacity style={styles.statBox} onPress={() => openModalGoals()}>
+                        <TouchableOpacity style={styles.statBox} onPress={() => openModalYellowCards()}>
                             <MaterialCommunityIcons name="card" size={24} color="white" />
                             <Text style={styles.statValue}>{stats.amarillas}</Text>
                             <Text style={styles.statLabel}>Tarjetas amarillas</Text>
                         </TouchableOpacity>
                     </Surface>
                     <Surface style={[styles.surface, { backgroundColor: '#bd1100' }]} elevation={5}>
-                        <TouchableOpacity style={styles.statBox} onPress={() => openModalAssists()}>
+                        <TouchableOpacity style={styles.statBox} onPress={() => openModalRedCards()}>
                             <MaterialCommunityIcons name="card" size={24} color="white" />
                             <Text style={styles.statValue}>{stats.rojas}</Text>
                             <Text style={styles.statLabel}>Tarjetas rojas</Text>
@@ -442,7 +457,7 @@ const HomeScreen = ({ logueado, setLogueado }) => {
                     </Surface>
                 </View>
 
-                
+
 
                 {/* Comparación con el resto del equipo */}
                 <View style={styles.centrar}>
@@ -453,12 +468,14 @@ const HomeScreen = ({ logueado, setLogueado }) => {
                             </View>
                             <View style={styles.tableHeader}>
                                 <Text style={styles.tableHeaderText}>Jugador</Text>
-                                <Text style={styles.tableHeaderText}>⚽</Text>
+                                <Text style={styles.tableHeaderText}>
+                                    <MaterialCommunityIcons name="soccer" size={20} color="white" />
+                                </Text>
                             </View>
                             {loading ? (
                                 <LoadingComponent />
                             ) : response1 && Array.isArray(maxGoals) && maxGoals.length > 0 ? (
-                                <ScrollView
+                                <View
                                     style={styles.scrollView}
                                 >
                                     {maxGoals.map((item, index) => (
@@ -466,7 +483,7 @@ const HomeScreen = ({ logueado, setLogueado }) => {
                                             {renderPlayerItem({ item })}
                                         </View>
                                     ))}
-                                </ScrollView>
+                                </View>
                             ) : (
                                 <ScrollView
                                     style={styles.scrollView}
@@ -495,12 +512,14 @@ const HomeScreen = ({ logueado, setLogueado }) => {
                             </View>
                             <View style={styles.tableHeader}>
                                 <Text style={styles.tableHeaderText}>Jugador</Text>
-                                <Text style={styles.tableHeaderText}>👟</Text>
+                                <Text style={styles.tableHeaderText}>
+                                    <MaterialCommunityIcons name="shoe-cleat" size={20} color="white" />
+                                </Text>
                             </View>
                             {loading ? (
                                 <LoadingComponent />
                             ) : response2 && Array.isArray(maxAssists) && maxAssists.length > 0 ? (
-                                <ScrollView
+                                <View
                                     style={styles.scrollView}
                                 >
                                     {maxAssists.map((item, index) => (
@@ -508,7 +527,7 @@ const HomeScreen = ({ logueado, setLogueado }) => {
                                             {renderPlayerItem({ item })}
                                         </View>
                                     ))}
-                                </ScrollView>
+                                </View>
                             ) : (
                                 <ScrollView
                                     style={styles.scrollView}
@@ -595,7 +614,7 @@ const HomeScreen = ({ logueado, setLogueado }) => {
                 </View>
             </Modal>
 
-            {/* Modal de Registro */}
+            {/* Modal de asistencias */}
             <Modal
                 animationType="slide"
                 transparent={true}
@@ -626,6 +645,101 @@ const HomeScreen = ({ logueado, setLogueado }) => {
                 </View>
             </Modal>
 
+
+            {/* Modal de minutos jugados */}
+            <Modal
+                animationType="slide"
+                transparent={true}
+                visible={modalVisibleMinutes}
+                onRequestClose={() => setModalVisibleMinutes(false)}
+            >
+                <View style={styles.modalCenter}>
+                    <View style={styles.modalContainer}>
+                        <LinearGradient colors={['#020887', '#13071E']} style={styles.headerModal}>
+                            <View style={styles.modalRow}>
+                                <Image style={styles.modalImage} source={require('../../assets/gol_blanco 2.png')} />
+                                <Text style={styles.modalTitle}>Minutos jugados</Text>
+                            </View>
+                        </LinearGradient>
+
+                        <ScrollView>
+                            <View style={styles.modalContent}>
+
+                            </View>
+                        </ScrollView>
+
+                        <TouchableOpacity
+                            style={styles.closeButton}
+                            onPress={() => setModalVisibleMinutes(false)}
+                        >
+                            <Text style={styles.closeButtonText}>Cerrar</Text>
+                        </TouchableOpacity>
+                    </View>
+                </View>
+            </Modal>
+
+            {/* Modal de tarjetas amarillas */}
+            <Modal
+                animationType="slide"
+                transparent={true}
+                visible={modalVisibleYellowCards}
+                onRequestClose={() => setModalVisibleYellowCards(false)}
+            >
+                <View style={styles.modalCenter}>
+                    <View style={styles.modalContainer}>
+                        <LinearGradient colors={['#020887', '#13071E']} style={styles.headerModal}>
+                            <View style={styles.modalRow}>
+                                <Image style={styles.modalImage} source={require('../../assets/gol_blanco 2.png')} />
+                                <Text style={styles.modalTitle}>Tarjetas amarillas</Text>
+                            </View>
+                        </LinearGradient>
+
+                        <ScrollView>
+                            <View style={styles.modalContent}>
+
+                            </View>
+                        </ScrollView>
+
+                        <TouchableOpacity
+                            style={styles.closeButton}
+                            onPress={() => setModalVisibleYellowCards(false)}
+                        >
+                            <Text style={styles.closeButtonText}>Cerrar</Text>
+                        </TouchableOpacity>
+                    </View>
+                </View>
+            </Modal>
+
+            {/* Modal de tarjetas rojas */}
+            <Modal
+                animationType="slide"
+                transparent={true}
+                visible={modalVisibleRedCards}
+                onRequestClose={() => setModalVisibleRedCards(false)}
+            >
+                <View style={styles.modalCenter}>
+                    <View style={styles.modalContainer}>
+                        <LinearGradient colors={['#020887', '#13071E']} style={styles.headerModal}>
+                            <View style={styles.modalRow}>
+                                <Image style={styles.modalImage} source={require('../../assets/gol_blanco 2.png')} />
+                                <Text style={styles.modalTitle}>Tarjetas rojas</Text>
+                            </View>
+                        </LinearGradient>
+
+                        <ScrollView>
+                            <View style={styles.modalContent}>
+                            </View>
+                        </ScrollView>
+
+                        <TouchableOpacity
+                            style={styles.closeButton}
+                            onPress={() => setModalVisibleRedCards(false)}
+                        >
+                            <Text style={styles.closeButtonText}>Cerrar</Text>
+                        </TouchableOpacity>
+                    </View>
+                </View>
+            </Modal>
         </ScrollView>
     )
 }
