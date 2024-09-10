@@ -9,6 +9,7 @@ const windowHeight = Dimensions.get('window').height;
 const MedicalHistory = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedInjury, setSelectedInjury] = useState(null);
+  const [returnModalVisible, setReturnModalVisible] = useState(false);
   const [injuries, setInjuries] = useState([
     { part: 'Tren superior', days: 4, injuryDate: '8 de noviembre 2023', returnDate: '12 de noviembre 2023' },
     { part: 'Tren inferior', days: 10, injuryDate: '10 de noviembre 2022', returnDate: '20 de noviembre 2022' },
@@ -20,6 +21,11 @@ const MedicalHistory = () => {
   const openModal = (injury) => {
     setSelectedInjury(injury);
     setModalVisible(true);
+  };
+
+  const openReturnModal = (injury) => {
+    setSelectedInjury(injury);
+    setReturnModalVisible(true);
   };
 
   return (
@@ -53,7 +59,7 @@ const MedicalHistory = () => {
               <TouchableOpacity style={[styles.iconButton, styles.redButton]} onPress={() => openModal(injury)}>
                 <Image source={require('../../assets/lesion.png')} style={styles.icon} />
               </TouchableOpacity>
-              <TouchableOpacity style={[styles.iconButton, styles.greenButton]} onPress={() => openModal(injury)}>
+              <TouchableOpacity style={[styles.iconButton, styles.greenButton]} onPress={() => openReturnModal(injury)}>
                 <Image source={require('../../assets/pelota.png')} style={styles.icon} />
               </TouchableOpacity>
             </View>
@@ -61,7 +67,7 @@ const MedicalHistory = () => {
         ))}
       </ScrollView>
 
-      {/* Modal */}
+      {/* Modal de Registro */}
       <Modal
         animationType="slide"
         transparent={true}
@@ -93,6 +99,45 @@ const MedicalHistory = () => {
             <TouchableOpacity
               style={styles.closeButton}
               onPress={() => setModalVisible(false)}
+            >
+              <Text style={styles.closeButtonText}>Cerrar</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Modal de Retorno */}
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={returnModalVisible}
+        onRequestClose={() => setReturnModalVisible(false)}
+      >
+        <View style={styles.modalCenter}>
+          <View style={styles.modalContainer}>
+            <LinearGradient colors={['#020887', '#13071E']} style={styles.headerModal}>
+              <View style={styles.modalRow}>
+                <Image style={styles.modalImage} source={require('../../assets/gol_blanco 2.png')} />
+                <Text style={styles.modalTitle}>Retorno</Text>
+              </View>
+            </LinearGradient>
+
+            <ScrollView>
+              <View style={styles.modalContent}>
+                <View style={styles.dateCard}>
+                  <Text style={styles.dateText}>{selectedInjury?.returnDate}</Text>
+                  <Text style={styles.dateLabel}>Retorno a entreno</Text>
+                </View>
+                <View style={styles.dateCard}>
+                  <Text style={styles.dateText}>{selectedInjury?.returnDate}</Text>
+                  <Text style={styles.dateLabel}>Retorno a partido</Text>
+                </View>
+              </View>
+            </ScrollView>
+
+            <TouchableOpacity
+              style={styles.closeButton}
+              onPress={() => setReturnModalVisible(false)}
             >
               <Text style={styles.closeButtonText}>Cerrar</Text>
             </TouchableOpacity>
