@@ -9,6 +9,7 @@ import Mood from "../components/PerformanceComponent/Mood";
 import fetchData from "../../api/components";
 import LoadingComponent from "../components/LoadingComponent";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
+import {AlertNotificationRoot} from "react-native-alert-notification";
 
 const width = Dimensions.get('window').width;
 const height = Dimensions.get('window').height;
@@ -120,7 +121,7 @@ const PerformanceDetails = () => {
     if (activeSection === 'Rendimiento') {
         component = <Performance player={performanceData} goles={goles} redCard={redCard} yellowCard={yellowCard}/>
     } else {
-        component = <Mood/>
+        component = <Mood mood={performanceData.estado_animo} idParticipation={performanceData.id_participacion}/>
     }
 
     let color;
@@ -141,54 +142,56 @@ const PerformanceDetails = () => {
     }
 
     return(
-        <View style={styles.container}>
-            <View style={styles.backgroundHeader}>
-                <TouchableOpacity style={styles.rowBackButton} onPress={goToMatches}>
-                    <Icon name='arrow-left-drop-circle' size={40} color='#fff'/>
-                </TouchableOpacity>
-                <Text style={styles.date}>{data.fecha}</Text>
-                <View style={styles.card}>
-                    <View style={styles.row}>
-                        <View style={styles.col}>
-                            <Image style={styles.img} source={{uri: `${SERVER_URL}images/equipos/${data.logo_equipo}`}}/>
-                            <Text style={styles.teamName}>{data.nombre_equipo}</Text>
-                        </View>
-                        <View style={styles.col}>
-                            <View style={styles.cont1}>
-                                <Text style={styles.text1}>{data.localidad_partido}</Text>
+        <AlertNotificationRoot>
+            <View style={styles.container}>
+                <View style={styles.backgroundHeader}>
+                    <TouchableOpacity style={styles.rowBackButton} onPress={goToMatches}>
+                        <Icon name='arrow-left-drop-circle' size={40} color='#fff'/>
+                    </TouchableOpacity>
+                    <Text style={styles.date}>{data.fecha}</Text>
+                    <View style={styles.card}>
+                        <View style={styles.row}>
+                            <View style={styles.col}>
+                                <Image style={styles.img} source={{uri: `${SERVER_URL}images/equipos/${data.logo_equipo}`}}/>
+                                <Text style={styles.teamName}>{data.nombre_equipo}</Text>
                             </View>
-                            <Text style={styles.text2}>{data.resultado_partido}</Text>
-                            <Text style={{marginTop: -10, fontFamily: 'Poppins_500Medium', fontSize: 15, color: color}}>{data.tipo_resultado_partido}</Text>
-                        </View>
-                        <View style={styles.col}>
-                            <Image style={styles.img} source={{uri: `${SERVER_URL}images/rivales/${data.logo_rival}`}}/>
-                            <Text style={styles.rivalName}>{data.nombre_rival}</Text>
+                            <View style={styles.col}>
+                                <View style={styles.cont1}>
+                                    <Text style={styles.text1}>{data.localidad_partido}</Text>
+                                </View>
+                                <Text style={styles.text2}>{data.resultado_partido}</Text>
+                                <Text style={{marginTop: -10, fontFamily: 'Poppins_500Medium', fontSize: 15, color: color}}>{data.tipo_resultado_partido}</Text>
+                            </View>
+                            <View style={styles.col}>
+                                <Image style={styles.img} source={{uri: `${SERVER_URL}images/rivales/${data.logo_rival}`}}/>
+                                <Text style={styles.rivalName}>{data.nombre_rival}</Text>
+                            </View>
                         </View>
                     </View>
                 </View>
+                <View style={styles.rowButton}>
+                    <Chip
+                        onPress={() => changeComponents('Rendimiento')}
+                        style={{backgroundColor: activeChip === 'Rendimiento' ? '#03045E' : '#e6e3e3',}}
+                        textStyle={{color: activeChip === 'Rendimiento' ? 'white' : '#757272', fontFamily: 'Poppins_400Regular'}}>Rendimiento
+                    </Chip>
+                    <Chip
+                        onPress={() => changeComponents('Animo')}
+                        style={{backgroundColor: activeChip === 'Animo' ? '#03045E' : '#e6e3e3',}}
+                        textStyle={{color: activeChip === 'Animo' ? 'white' : '#757272', fontFamily: 'Poppins_400Regular'}}>Estado de ánimo
+                    </Chip>
+                </View>
+                <ScrollView style={styles.scroll}>
+                    {
+                        load ? (
+                            component
+                        ): (
+                            <LoadingComponent />
+                        )
+                    }
+                </ScrollView>
             </View>
-            <View style={styles.rowButton}>
-                <Chip
-                    onPress={() => changeComponents('Rendimiento')}
-                    style={{backgroundColor: activeChip === 'Rendimiento' ? '#03045E' : '#e6e3e3',}}
-                    textStyle={{color: activeChip === 'Rendimiento' ? 'white' : '#757272', fontFamily: 'Poppins_400Regular'}}>Rendimiento
-                </Chip>
-                <Chip
-                    onPress={() => changeComponents('Animo')}
-                    style={{backgroundColor: activeChip === 'Animo' ? '#03045E' : '#e6e3e3',}}
-                    textStyle={{color: activeChip === 'Animo' ? 'white' : '#757272', fontFamily: 'Poppins_400Regular'}}>Estado de ánimo
-                </Chip>
-            </View>
-            <ScrollView style={styles.scroll}>
-                {
-                    load ? (
-                        component
-                    ): (
-                        <LoadingComponent />
-                    )
-                }
-            </ScrollView>
-        </View>
+        </AlertNotificationRoot>
     );
 };
 
