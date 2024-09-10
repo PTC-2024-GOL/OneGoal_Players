@@ -1,4 +1,4 @@
-import {View, Text, StyleSheet, Dimensions, Image, ScrollView} from "react-native";
+import {View, Text, StyleSheet, Dimensions, Image, ScrollView, TouchableOpacity} from "react-native";
 import {useFocusEffect, useNavigation, useRoute} from "@react-navigation/native";
 import {useCallback, useState} from "react";
 import {Card, Chip} from "react-native-paper";
@@ -7,6 +7,8 @@ import Performance from "../components/PerformanceComponent/Performance";
 import {SERVER_URL} from "../../api/constantes";
 import Mood from "../components/PerformanceComponent/Mood";
 import fetchData from "../../api/components";
+import LoadingComponent from "../components/LoadingComponent";
+import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 
 const width = Dimensions.get('window').width;
 const height = Dimensions.get('window').height;
@@ -25,6 +27,8 @@ const PerformanceDetails = () => {
     const { data } = route.params;
     let idJugador = data.id_jugador;
     let idPartido = data.id_partido;
+    let idParticipacion = performanceData.id_participacion;
+    const [load, setLoad] = useState(false);
 
     // URL de la API para participaciones
     const PARTICIPATION_API = 'services/players/participaciones_partidos.php';
@@ -41,7 +45,7 @@ const PerformanceDetails = () => {
         if(data.status) {
             setPerformanceData(data.dataset);
         }else {
-            console.log('Algo paso')
+            console.log(data.error)
         }
     }
 
@@ -60,6 +64,7 @@ const PerformanceDetails = () => {
         if(data.status){
             setGoles(data.dataset);
         }else {
+            setGoles(0)
             console.log(data.error);
         }
     }
@@ -90,13 +95,24 @@ const PerformanceDetails = () => {
         }
     }
 
+    const goToMatches = () => {
+        navigation.goBack();
+    }
+
     useFocusEffect(
         useCallback(()=>{
-            fillParticipationDetail();
-            fillGoles();
-            fillYellowCards();
-            fillRedCards();
-        },[activeSection, idPartido])
+            const callApis = async () => {
+                setLoad(false);
+
+                await fillParticipationDetail();
+                await fillGoles();
+                await fillYellowCards();
+                await fillRedCards();
+
+                setLoad(true);
+            }
+            callApis();
+        },[activeSection, idPartido, idParticipacion])
     )
 
     //Manejo para el cambio de sub pantallas
@@ -107,9 +123,29 @@ const PerformanceDetails = () => {
         component = <Mood/>
     }
 
+    let color;
+    let result = data.tipo_resultado_partido;
+    switch(result){
+        case 'Victoria':
+            color = '#10b81a';
+            break;
+        case 'Pendiente':
+            color = '#d8b41d';
+            break
+        case 'Derrota':
+            color = '#e60404';
+            break;
+        case 'Empate':
+            color = '#d86628'
+            break;
+    }
+
     return(
         <View style={styles.container}>
             <View style={styles.backgroundHeader}>
+                <TouchableOpacity style={styles.rowBackButton} onPress={goToMatches}>
+                    <Icon name='arrow-left-drop-circle' size={40} color='#fff'/>
+                </TouchableOpacity>
                 <Text style={styles.date}>{data.fecha}</Text>
                 <View style={styles.card}>
                     <View style={styles.row}>
@@ -122,7 +158,7 @@ const PerformanceDetails = () => {
                                 <Text style={styles.text1}>{data.localidad_partido}</Text>
                             </View>
                             <Text style={styles.text2}>{data.resultado_partido}</Text>
-                            <Text style={{marginTop: -10, fontFamily: 'Poppins_500Medium', fontSize: 15, color: '#10b81a'}}>{data.tipo_resultado_partido}</Text>
+                            <Text style={{marginTop: -10, fontFamily: 'Poppins_500Medium', fontSize: 15, color: color}}>{data.tipo_resultado_partido}</Text>
                         </View>
                         <View style={styles.col}>
                             <Image style={styles.img} source={{uri: `${SERVER_URL}images/rivales/${data.logo_rival}`}}/>
@@ -144,7 +180,13 @@ const PerformanceDetails = () => {
                 </Chip>
             </View>
             <ScrollView style={styles.scroll}>
-                {component}
+                {
+                    load ? (
+                        component
+                    ): (
+                        <LoadingComponent />
+                    )
+                }
             </ScrollView>
         </View>
     );
@@ -159,6 +201,12 @@ const styles = StyleSheet.create({
     backgroundHeader: {
         backgroundColor: '#334195',
         height: 200
+    },
+    rowBackButton: {
+      flexDirection: "row",
+        padding: 10,
+        marginTop: 20,
+        marginStart: 8
     },
     card: {
         position:"absolute",
@@ -185,7 +233,7 @@ const styles = StyleSheet.create({
         justifyContent: "center"
     },
     date: {
-        marginTop: 60,
+        marginTop: -10,
         textAlign: "center",
         fontFamily: 'Poppins_600SemiBold',
         color: '#fff',

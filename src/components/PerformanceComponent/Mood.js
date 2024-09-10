@@ -1,9 +1,16 @@
-import {View, Text, StyleSheet, ScrollView, TouchableOpacity} from "react-native";
+import {View, Text, StyleSheet, ScrollView, TouchableOpacity, Image} from "react-native";
 import Fonts from "../../../fonts/fonts";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
+import {useState} from "react";
 
 const Mood = () => {
     Fonts();
+
+    const [selectedCard, setSelectedCard] = useState(null);
+
+    const handleSelectCard = (card) => {
+        setSelectedCard(card);
+    }
 
     return(
         <View>
@@ -11,28 +18,38 @@ const Mood = () => {
             <Text style={styles.text1}>Selecciona el emoji con el que te sientes identifcado</Text>
                 <View style={styles.row}>
                     <ScrollView horizontal={true}>
-                    <TouchableOpacity style={styles.card1}>
-                        <Icon name='emoticon-excited' size={50} color={'#eabd03'}/>
-                        <Text style={styles.emotion}>Energético</Text>
+                    <TouchableOpacity onPress={()=>{handleSelectCard(1)}}>
+                        <View style={[styles.card, styles.card1, selectedCard === 1 && styles.selectedCard]}>
+                            <Image style={styles.img} source={require('../../../assets/emotions/1.png')}/>
+                            <Text style={styles.emotion}>Energético</Text>
+                        </View>
                     </TouchableOpacity>
-                    <TouchableOpacity style={styles.card2}>
-                        <Icon name='emoticon-happy' size={50} color={'#d87309'}/>
-                        <Text style={styles.emotion}>Satisfecho</Text>
+                    <TouchableOpacity onPress={()=>{handleSelectCard(2)}}>
+                        <View style={[styles.card, styles.card2, selectedCard === 2 && styles.selectedCard]}>
+                            <Image style={styles.img} source={require('../../../assets/emotions/2.png')}/>
+                            <Text style={styles.emotion}>Satisfecho</Text>
+                        </View>
                     </TouchableOpacity>
-                    <TouchableOpacity style={styles.card3}>
-                        <Icon name='emoticon-neutral' size={50} color={'#3cd324'}/>
-                        <Text style={styles.emotion}>Normal</Text>
+                    <TouchableOpacity onPress={()=>{handleSelectCard(3)}}>
+                        <View style={[styles.card, styles.card3, selectedCard === 3 && styles.selectedCard]}>
+                            <Image style={styles.img} source={require('../../../assets/emotions/3.png')}/>
+                            <Text style={styles.emotion}>Normal</Text>
+                        </View>
                     </TouchableOpacity>
                     </ScrollView>
                 </View>
                 <View style={styles.row2}>
-                    <TouchableOpacity style={styles.card4}>
-                        <Icon name='emoticon-frown' size={50} color={'#1b5dc1'}/>
-                        <Text style={styles.emotion}>Agotado</Text>
+                    <TouchableOpacity onPress={()=>{handleSelectCard(4)}}>
+                        <View style={[styles.card, styles.card4, selectedCard === 4 && styles.selectedCard]}>
+                            <Image style={styles.img} source={require('../../../assets/emotions/4.png')}/>
+                            <Text style={styles.emotion}>Agotado</Text>
+                        </View>
                     </TouchableOpacity>
-                    <TouchableOpacity style={styles.card5}>
-                        <Icon name='emoticon-sad' size={50} color={'#df2222'}/>
-                        <Text style={styles.emotion}>Desanimado</Text>
+                    <TouchableOpacity onPress={()=>{handleSelectCard(5)}}>
+                       <View style={[styles.card, styles.card5, selectedCard === 5 && styles.selectedCard]}>
+                           <Image style={styles.img} source={require('../../../assets/emotions/5.png')}/>
+                           <Text style={styles.emotion}>Desanimado</Text>
+                       </View>
                     </TouchableOpacity>
                 </View>
         </View>
@@ -64,7 +81,7 @@ const styles = StyleSheet.create({
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
-        backgroundColor: '#FFE884',
+        backgroundColor: '#fbda4c',
         padding: 10,
         width: 100,
         borderRadius: 10
@@ -73,7 +90,7 @@ const styles = StyleSheet.create({
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
-        backgroundColor: '#FFB86D',
+        backgroundColor: '#fb8dbb',
         padding: 10,
         width: 100,
         borderRadius: 10,
@@ -83,7 +100,7 @@ const styles = StyleSheet.create({
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
-        backgroundColor: '#AED7A7',
+        backgroundColor: '#f1c7f4',
         padding: 10,
         width: 100,
         borderRadius: 10
@@ -92,7 +109,7 @@ const styles = StyleSheet.create({
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
-        backgroundColor: '#95BBF5',
+        backgroundColor: '#aaead6',
         padding: 10,
         width: 100,
         borderRadius: 10
@@ -101,14 +118,23 @@ const styles = StyleSheet.create({
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
-        backgroundColor: '#FF8585',
+        backgroundColor: '#bad7f8',
         padding: 10,
         width: 100,
         borderRadius: 10
     },
     emotion: {
         fontFamily: 'Poppins_300Light',
-        fontSize: 12
-    }
+        fontSize: 12,
+        marginTop: -10
+    },
+    img: {
+        width: 100,
+        height: 80,
+    },
+    selectedCard: {
+        borderColor: '#777575',
+        borderWidth: 2,
+    },
 })
 export default Mood;
