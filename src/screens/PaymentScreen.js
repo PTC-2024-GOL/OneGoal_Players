@@ -10,11 +10,11 @@ const PaymentScreen = () => {
   const [selectedPayment, setSelectedPayment] = useState(null);
  
   const payments = [
-    { month: 'Enero', amount: 20.25, isPaid: true, date: '20 de enero de 2024' },
-    { month: 'Febrero', amount: 20.25, isPaid: true, date: '20 de febrero de 2024' },
-    { month: 'Marzo', amount: 20.25, isPaid: true, date: '20 de marzo de 2024' },
-    { month: 'Abril', amount: 20.25, isPaid: true, date: '20 de abril de 2024' },
-    { month: 'Mayo', amount: 20.25, isPaid: true, date: '20 de mayo de 2024' },
+    { month: 'Enero', amount: 20.25, isPaid: true, date: '20 de enero de 2024', isLate: false },
+    { month: 'Febrero', amount: 20.25, isPaid: true, date: '20 de febrero de 2024', isLate: true },
+    { month: 'Marzo', amount: 20.25, isPaid: true, date: '20 de marzo de 2024', isLate: false },
+    { month: 'Abril', amount: 20.25, isPaid: true, date: '20 de abril de 2024', isLate: true },
+    { month: 'Mayo', amount: 20.25, isPaid: true, date: '20 de mayo de 2024', isLate: false },
   ];
  
   const openModal = (payment) => {
@@ -50,11 +50,20 @@ const PaymentScreen = () => {
         {payments.map((payment, index) => (
           <View key={index} style={styles.paymentRow}>
             <Text style={[styles.paymentText, styles.amountColumn]}>${payment.amount.toFixed(2)}</Text>
-            <Text style={[styles.paymentText, styles.lateColumn]}>No</Text>
+            <View style={[styles.lateColumn, styles.iconContainer]}>
+              <Ionicons
+                name="time-outline"
+                size={24}
+                color={payment.isLate ? '#F44262' : '#4CAF50'}
+              />
+            </View>
             <Text style={[styles.paymentText, styles.feeColumn]}>$0.25</Text>
             <Text style={[styles.paymentText, styles.totalColumn]}>${(payment.amount + 0.25).toFixed(2)}</Text>
             <View style={[styles.dateColumn, styles.iconContainer]}>
-              <TouchableOpacity style={[styles.iconButton, styles.blueButton]} onPress={() => openModal(payment)}>
+              <TouchableOpacity
+                style={[styles.iconButton, styles.blueButton]}
+                onPress={() => openModal(payment)}
+              >
                 <Image source={require('../../assets/calendario.png')} style={styles.icon} />
               </TouchableOpacity>
             </View>
@@ -260,6 +269,11 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 16,
     fontWeight: 'bold',
+  },
+  lateColumn: {
+    width: '20%',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });
  
