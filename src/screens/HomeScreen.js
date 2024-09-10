@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import {
     View, StyleSheet, TouchableOpacity, Image, Dimensions, TextInput, ScrollView,
-    RefreshControl, Modal
+    RefreshControl, Modal, ActivityIndicator
 } from 'react-native';
 import { Text, Searchbar, Surface } from 'react-native-paper';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -12,8 +12,10 @@ import { useFocusEffect } from "@react-navigation/native";
 import fetchData from '../../api/components';
 import { SERVER_URL } from "../../api/constantes";
 import { useNavigation } from '@react-navigation/native';
+import LoadingComponent from "../components/LoadingComponent";
 
 import logo from '../../assets/gol_blanco 2.png';
+import PlayerCard from '../components/Cards/PlayerCard';
 const { width, height } = Dimensions.get('window');
 
 // URL de la API para el usuario
@@ -24,12 +26,20 @@ const HomeScreen = ({ logueado, setLogueado }) => {
     const [centerText, setCenterText] = useState("Selecciona un segmento");
     const [foto, setFoto] = useState("../../assets/man.png");
     const [dataPie, setDataPie] = useState([]);
+    const [loading, setLoading] = useState(true); // Estado para controlar la carga inicial
+    const [maxGoals, setMaxGoals] = useState([]);
+    const [maxAssists, setMaxAssists] = useState([]);
     const [response, setResponse] = useState(false);
+    const [response1, setResponse1] = useState(false);
+    const [response2, setResponse2] = useState(false);
     //Estados para almacenar los datos
     const [stats, setStats] = useState({
         goles: " ",
         asistencias: " ",
         partidos: " ",
+        minutos: " ",
+        amarillas: " ",
+        rojas: " ",
     });
 
     const navigation = useNavigation(); // Obtiene el objeto de navegación
@@ -60,6 +70,9 @@ const HomeScreen = ({ logueado, setLogueado }) => {
                 goles: profileData.TOTAL_GOLES,
                 asistencias: profileData.TOTAL_ASISTENCIAS,
                 partidos: profileData.TOTAL_PARTIDOS,
+                minutos: profileData.MINUTOS_JUGADOS,
+                amarillas: profileData.TARJETAS_AMARILLAS,
+                rojas: profileData.TARJETAS_ROJAS,
             });
             console.log(data.dataset);
         } catch (error) {
@@ -68,6 +81,9 @@ const HomeScreen = ({ logueado, setLogueado }) => {
                 goles: " ",
                 asistencias: " ",
                 partidos: " ",
+                minutos: " ",
+                amarillas: " ",
+                rojas: " ",
             });
         } finally {
             console.log("Petición hecha");
@@ -127,6 +143,64 @@ const HomeScreen = ({ logueado, setLogueado }) => {
         }
     };
 
+    const fillMaxGoals = async () => {
+        try {
+            const DATA = await fetchData(USER_API, "maximosGoleadores");
+
+            if (DATA.status) {
+                console.log("Data procesada para maximosGoleadores:", DATA.dataset);
+                let data = DATA.dataset.map((item) => ({
+                    name: item.JUGADOR,
+                    image: item.FOTO,
+                    position: item.POSICION,
+                    number: item.TOTAL_GOLES,
+                }));
+                setMaxGoals(data);
+                console.log("MaxGoals después de setMaxGoals:", data); // Verifica los datos antes de que se actualice el estado
+                setResponse1(true);
+            } else {
+                setMaxGoals([]);
+                setResponse1(false);
+                console.log("La respuesta no contiene datos válidos:", DATA);
+            }
+        } catch (error) {
+            console.log("Error fetching maximosGoleadores:", error);
+            setMaxGoals([]);
+            setResponse1(false);
+        } finally {
+            setLoading(false);
+            setRefreshing(false);
+        }
+    };
+
+    const fillMaxAssists = async () => {
+        try {
+            const response = await fetchData(USER_API, "maximosAsistentes");
+
+            if (response.status) {
+                let data = response.dataset.map((item) => ({
+                    name: item.JUGADOR,
+                    image: item.FOTO,
+                    position: item.POSICION,
+                    number: item.TOTAL_ASISTENCIAS,
+                }));
+                setMaxAssists(data);
+                console.log("MaxAssists después de setMaxAssists:", data); // Verifica los datos antes de que se actualice el estado
+                setResponse2(true);
+            } else {
+                setMaxAssists([]);
+                setResponse2(false);
+                console.log("La respuesta no contiene datos válidos:", response);
+            }
+        } catch (error) {
+            console.log("Error fetching maximosAsistentes:", error);
+            setMaxAssists([]);
+            setResponse2(false);
+        } finally {
+            setLoading(false);
+            setRefreshing(false);
+        }
+    };
 
     const handleProfile = () => {
         navigation.navigate('LoginNav', {
@@ -138,13 +212,14 @@ const HomeScreen = ({ logueado, setLogueado }) => {
         navigation.navigate('Jornadas');
     };
 
-
     //Efecto que se ejecuta al montar el componente para inicializar la aplicación
     useEffect(() => {
         const initializeApp = async () => {
             await getUser();
             await readStats();
             await fillGraphicDoughnut();
+            await fillMaxGoals();
+            await fillMaxAssists();
         };
         initializeApp();
     }, []);
@@ -155,6 +230,8 @@ const HomeScreen = ({ logueado, setLogueado }) => {
                 await getUser();
                 await readStats();
                 await fillGraphicDoughnut();
+                await fillMaxGoals();
+                await fillMaxAssists();
             };
             initializeApp();
         }, [])
@@ -165,11 +242,17 @@ const HomeScreen = ({ logueado, setLogueado }) => {
         await getUser();
         await readStats();
         await fillGraphicDoughnut();
+        await fillMaxGoals();
+        await fillMaxAssists();
         // Aquí se llamarán las funciones necesarias para refrescar la información
         setRefreshing(false);
     }, []);
 
-
+    useEffect(() => {
+        fillMaxGoals();
+        fillMaxAssists();
+    }, []);
+    
     // Componente para los puntos de la leyenda
     const renderDot = color => {
         return (
@@ -207,6 +290,11 @@ const HomeScreen = ({ logueado, setLogueado }) => {
         );
     };
 
+
+    //Renderizador de las cartas de los productos
+    const renderPlayerItem = ({ item }) => (
+        <PlayerCard item={item} />
+    );
 
     return (
         <ScrollView
@@ -306,7 +394,6 @@ const HomeScreen = ({ logueado, setLogueado }) => {
 
                 {/* Sección de Estadísticas */}
                 <View style={styles.statsContainer}>
-
                     <Surface style={[styles.surface, { backgroundColor: '#020887' }]} elevation={5}>
                         <TouchableOpacity style={styles.statBox} onPress={() => openModalMatches()}>
                             <MaterialCommunityIcons name="soccer-field" size={24} color="white" />
@@ -329,6 +416,118 @@ const HomeScreen = ({ logueado, setLogueado }) => {
                         </TouchableOpacity>
                     </Surface>
                 </View>
+
+                {/* Sección de Estadísticas 2*/}
+                <View style={styles.statsContainer}>
+                    <Surface style={[styles.surface, { backgroundColor: '#5209B0' }]} elevation={5}>
+                        <TouchableOpacity style={styles.statBox} onPress={() => openModalMatches()}>
+                            <MaterialCommunityIcons name="camera-timer" size={24} color="white" />
+                            <Text style={styles.statValue}>{stats.minutos}</Text>
+                            <Text style={styles.statLabel}>Minutos jugados</Text>
+                        </TouchableOpacity>
+                    </Surface>
+                    <Surface style={[styles.surface, { backgroundColor: '#dac002' }]} elevation={5}>
+                        <TouchableOpacity style={styles.statBox} onPress={() => openModalGoals()}>
+                            <MaterialCommunityIcons name="card" size={24} color="white" />
+                            <Text style={styles.statValue}>{stats.amarillas}</Text>
+                            <Text style={styles.statLabel}>Tarjetas amarillas</Text>
+                        </TouchableOpacity>
+                    </Surface>
+                    <Surface style={[styles.surface, { backgroundColor: '#bd1100' }]} elevation={5}>
+                        <TouchableOpacity style={styles.statBox} onPress={() => openModalAssists()}>
+                            <MaterialCommunityIcons name="card" size={24} color="white" />
+                            <Text style={styles.statValue}>{stats.rojas}</Text>
+                            <Text style={styles.statLabel}>Tarjetas rojas</Text>
+                        </TouchableOpacity>
+                    </Surface>
+                </View>
+
+                
+
+                {/* Comparación con el resto del equipo */}
+                <View style={styles.centrar}>
+                    <View style={styles.infoRowGraphic}>
+                        <View style={styles.trainingChartContainer}>
+                            <View style={styles.rowContent3}>
+                                <Text style={styles.trainingChartText}>Máximos goleadores</Text>
+                            </View>
+                            <View style={styles.tableHeader}>
+                                <Text style={styles.tableHeaderText}>Jugador</Text>
+                                <Text style={styles.tableHeaderText}>⚽</Text>
+                            </View>
+                            {loading ? (
+                                <LoadingComponent />
+                            ) : response1 && Array.isArray(maxGoals) && maxGoals.length > 0 ? (
+                                <ScrollView
+                                    style={styles.scrollView}
+                                >
+                                    {maxGoals.map((item, index) => (
+                                        <View key={index}>
+                                            {renderPlayerItem({ item })}
+                                        </View>
+                                    ))}
+                                </ScrollView>
+                            ) : (
+                                <ScrollView
+                                    style={styles.scrollView}
+                                    refreshControl={
+                                        <RefreshControl
+                                            refreshing={refreshing}
+                                            onRefresh={onRefresh}
+                                        />
+                                    }
+                                >
+                                    <View style={{ height: 200, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                        <Image style={{ height: 80, width: 80, marginBottom: 10 }} source={require('../../assets/find.png')} />
+                                        <Text style={{ backgroundColor: '#e6ecf1', color: '#043998', padding: 20, borderRadius: 15, maxWidth: 300 }}>No se encontraron entrenamientos</Text>
+                                    </View>
+                                </ScrollView>
+                            )}
+                        </View>
+                    </View>
+                </View>
+
+                <View style={styles.centrar}>
+                    <View style={styles.infoRowGraphic}>
+                        <View style={styles.trainingChartContainer}>
+                            <View style={styles.rowContent3}>
+                                <Text style={styles.trainingChartText}>Máximos asistentes</Text>
+                            </View>
+                            <View style={styles.tableHeader}>
+                                <Text style={styles.tableHeaderText}>Jugador</Text>
+                                <Text style={styles.tableHeaderText}>👟</Text>
+                            </View>
+                            {loading ? (
+                                <LoadingComponent />
+                            ) : response2 && Array.isArray(maxAssists) && maxAssists.length > 0 ? (
+                                <ScrollView
+                                    style={styles.scrollView}
+                                >
+                                    {maxAssists.map((item, index) => (
+                                        <View key={index}>
+                                            {renderPlayerItem({ item })}
+                                        </View>
+                                    ))}
+                                </ScrollView>
+                            ) : (
+                                <ScrollView
+                                    style={styles.scrollView}
+                                    refreshControl={
+                                        <RefreshControl
+                                            refreshing={refreshing}
+                                            onRefresh={onRefresh}
+                                        />
+                                    }
+                                >
+                                    <View style={{ height: 200, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                        <Image style={{ height: 80, width: 80, marginBottom: 10 }} source={require('../../assets/find.png')} />
+                                        <Text style={{ backgroundColor: '#e6ecf1', color: '#043998', padding: 20, borderRadius: 15, maxWidth: 300 }}>No se encontraron entrenamientos</Text>
+                                    </View>
+                                </ScrollView>
+                            )}
+                        </View>
+                    </View>
+                </View>
             </LinearGradient>
 
 
@@ -350,7 +549,7 @@ const HomeScreen = ({ logueado, setLogueado }) => {
 
                         <ScrollView>
                             <View style={styles.modalContent}>
-                                
+
                             </View>
                         </ScrollView>
 
@@ -590,6 +789,7 @@ const styles = StyleSheet.create({
     infoRowGraphic: {
         padding: 12,
         margin: 2,
+        marginBottom: 20,
         borderRadius: 10,
         backgroundColor: "white",
         width: width * 0.9,
@@ -630,57 +830,88 @@ const styles = StyleSheet.create({
         borderRadius: 25,
     },
     modalCenter: {
-      flex: 1,
-      justifyContent: 'center',
-      alignItems: 'center',
-      backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
     },
     modalContainer: {
-      width: width * 0.8,
-      backgroundColor: 'white',
-      borderRadius: 20,
-      shadowColor: '#000',
-      shadowOffset: {
-        width: 0,
-        height: 2,
-      },
-      shadowOpacity: 0.25,
-      shadowRadius: 4,
-      elevation: 5,
+        width: width * 0.8,
+        backgroundColor: 'white',
+        borderRadius: 20,
+        shadowColor: '#000',
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 4,
+        elevation: 5,
     },
     headerModal: {
-      borderTopLeftRadius: 20,
-      borderTopRightRadius: 20,
-      padding: 15,
+        borderTopLeftRadius: 20,
+        borderTopRightRadius: 20,
+        padding: 15,
     },
     modalRow: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'center',
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
     },
     modalImage: {
-      width: 40,
-      height: 40,
-      marginRight: 10,
+        width: 40,
+        height: 40,
+        marginRight: 10,
     },
     modalTitle: {
-      color: '#fff',
-      fontSize: 24,
-      fontWeight: 'bold',
+        color: '#fff',
+        fontSize: 24,
+        fontWeight: 'bold',
     },
     modalContent: {
-      padding: 20,
+        padding: 20,
     },
     closeButton: {
-      backgroundColor: '#F44262',
-      padding: 10,
-      borderBottomLeftRadius: 20,
-      borderBottomRightRadius: 20,
-      alignItems: 'center',
+        backgroundColor: '#F44262',
+        padding: 10,
+        borderBottomLeftRadius: 20,
+        borderBottomRightRadius: 20,
+        alignItems: 'center',
     },
     closeButtonText: {
-      color: '#fff',
-      fontSize: 16,
-      fontWeight: 'bold',
+        color: '#fff',
+        fontSize: 16,
+        fontWeight: 'bold',
+    },
+    tableHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        backgroundColor: '#334195',
+        borderRadius: 8,
+        padding: 10,
+        marginBottom: 10,
+    },
+    tableHeaderText: {
+        color: 'white',
+        fontSize: 14,
+        fontWeight: 'bold',
+        flex: 1,
+        textAlign: 'center',
+    },
+    scrollView: {
+        flex: 1,
+    },
+    tableRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        borderBottomWidth: 1,
+        borderBottomColor: '#e0e0e0',
+        paddingVertical: 15,
+    },
+    tableText: {
+        fontSize: 14,
+        flex: 1,
+        textAlign: 'center',
     },
 });
