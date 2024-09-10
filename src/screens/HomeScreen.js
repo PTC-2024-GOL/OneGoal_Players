@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import {
     View, StyleSheet, TouchableOpacity, Image, Dimensions, TextInput, ScrollView,
-    RefreshControl
+    RefreshControl, Modal
 } from 'react-native';
 import { Text, Searchbar, Surface } from 'react-native-paper';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -34,6 +34,22 @@ const HomeScreen = ({ logueado, setLogueado }) => {
 
     const navigation = useNavigation(); // Obtiene el objeto de navegación
 
+
+    const [modalVisibleGoals, setModalVisibleGoals] = useState(false);
+    const [modalVisibleMatches, setModalVisibleMatches] = useState(false);
+    const [modalVisibleAssists, setModalVisibleAssists] = useState(false);
+
+    const openModalGoals = () => {
+        setModalVisibleGoals(true);
+    };
+
+    const openModalMatches = () => {
+        setModalVisibleMatches(true);
+    };
+
+    const openModalAssists = () => {
+        setModalVisibleAssists(true);
+    };
 
     //Leer las estadisticas que tiene el jugador
     const readStats = async () => {
@@ -256,6 +272,7 @@ const HomeScreen = ({ logueado, setLogueado }) => {
                                         innerRadius={50}
                                         textColor="black"
                                         textSize={12}
+                                        showGradient
                                         onPress={(index) => {
                                             setCenterText(index.text || "Selecciona un segmento");
                                         }}
@@ -277,17 +294,10 @@ const HomeScreen = ({ logueado, setLogueado }) => {
                                         justifyContent: "center",
                                     }}
                                 >
-                                    <Text
-                                        style={{
-                                            backgroundColor: "#e6ecf1",
-                                            color: "#043998",
-                                            padding: 15,
-                                            borderRadius: 15,
-                                            maxWidth: 150,
-                                        }}
-                                    >
-                                        No se encontraron datos para la gráfica
-                                    </Text>
+                                    <View style={{ height: 200, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                        <Image style={{ height: 80, width: 80, marginBottom: 10 }} source={require('../../assets/find.png')} />
+                                        <Text style={{ backgroundColor: '#e6ecf1', color: '#043998', padding: 20, borderRadius: 15, maxWidth: 300 }}>No se encontraron datos para la graficas</Text>
+                                    </View>
                                 </View>
                             )}
                         </View>
@@ -298,28 +308,125 @@ const HomeScreen = ({ logueado, setLogueado }) => {
                 <View style={styles.statsContainer}>
 
                     <Surface style={[styles.surface, { backgroundColor: '#020887' }]} elevation={5}>
-                        <View style={styles.statBox}>
+                        <TouchableOpacity style={styles.statBox} onPress={() => openModalMatches()}>
                             <MaterialCommunityIcons name="soccer-field" size={24} color="white" />
                             <Text style={styles.statValue}>{stats.partidos}</Text>
                             <Text style={styles.statLabel}>Total partidos</Text>
-                        </View>
+                        </TouchableOpacity>
                     </Surface>
                     <Surface style={[styles.surface, { backgroundColor: '#5209B0' }]} elevation={5}>
-                        <View style={styles.statBox}>
+                        <TouchableOpacity style={styles.statBox} onPress={() => openModalGoals()}>
                             <MaterialCommunityIcons name="soccer" size={24} color="white" />
                             <Text style={styles.statValue}>{stats.goles}</Text>
                             <Text style={styles.statLabel}>Total goles</Text>
-                        </View>
+                        </TouchableOpacity>
                     </Surface>
                     <Surface style={[styles.surface, { backgroundColor: '#020887' }]} elevation={5}>
-                        <View style={styles.statBox}>
+                        <TouchableOpacity style={styles.statBox} onPress={() => openModalAssists()}>
                             <MaterialCommunityIcons name="shoe-cleat" size={24} color="white" />
                             <Text style={styles.statValue}>{stats.asistencias}</Text>
                             <Text style={styles.statLabel}>Total asistencias</Text>
-                        </View>
+                        </TouchableOpacity>
                     </Surface>
                 </View>
             </LinearGradient>
+
+
+            {/* Modal de goles */}
+            <Modal
+                animationType="slide"
+                transparent={true}
+                visible={modalVisibleGoals}
+                onRequestClose={() => setModalVisibleGoals(false)}
+            >
+                <View style={styles.modalCenter}>
+                    <View style={styles.modalContainer}>
+                        <LinearGradient colors={['#020887', '#13071E']} style={styles.headerModal}>
+                            <View style={styles.modalRow}>
+                                <Image style={styles.modalImage} source={require('../../assets/gol_blanco 2.png')} />
+                                <Text style={styles.modalTitle}>Goles</Text>
+                            </View>
+                        </LinearGradient>
+
+                        <ScrollView>
+                            <View style={styles.modalContent}>
+                                
+                            </View>
+                        </ScrollView>
+
+                        <TouchableOpacity
+                            style={styles.closeButton}
+                            onPress={() => setModalVisibleGoals(false)}
+                        >
+                            <Text style={styles.closeButtonText}>Cerrar</Text>
+                        </TouchableOpacity>
+                    </View>
+                </View>
+            </Modal>
+
+            {/* Modal de partidos */}
+            <Modal
+                animationType="slide"
+                transparent={true}
+                visible={modalVisibleMatches}
+                onRequestClose={() => setModalVisibleMatches(false)}
+            >
+                <View style={styles.modalCenter}>
+                    <View style={styles.modalContainer}>
+                        <LinearGradient colors={['#020887', '#13071E']} style={styles.headerModal}>
+                            <View style={styles.modalRow}>
+                                <Image style={styles.modalImage} source={require('../../assets/gol_blanco 2.png')} />
+                                <Text style={styles.modalTitle}>Partidos</Text>
+                            </View>
+                        </LinearGradient>
+
+                        <ScrollView>
+                            <View style={styles.modalContent}>
+
+                            </View>
+                        </ScrollView>
+
+                        <TouchableOpacity
+                            style={styles.closeButton}
+                            onPress={() => setModalVisibleMatches(false)}
+                        >
+                            <Text style={styles.closeButtonText}>Cerrar</Text>
+                        </TouchableOpacity>
+                    </View>
+                </View>
+            </Modal>
+
+            {/* Modal de Registro */}
+            <Modal
+                animationType="slide"
+                transparent={true}
+                visible={modalVisibleAssists}
+                onRequestClose={() => setModalVisibleAssists(false)}
+            >
+                <View style={styles.modalCenter}>
+                    <View style={styles.modalContainer}>
+                        <LinearGradient colors={['#020887', '#13071E']} style={styles.headerModal}>
+                            <View style={styles.modalRow}>
+                                <Image style={styles.modalImage} source={require('../../assets/gol_blanco 2.png')} />
+                                <Text style={styles.modalTitle}>Asistencias</Text>
+                            </View>
+                        </LinearGradient>
+
+                        <ScrollView>
+                            <View style={styles.modalContent}>
+                            </View>
+                        </ScrollView>
+
+                        <TouchableOpacity
+                            style={styles.closeButton}
+                            onPress={() => setModalVisibleAssists(false)}
+                        >
+                            <Text style={styles.closeButtonText}>Cerrar</Text>
+                        </TouchableOpacity>
+                    </View>
+                </View>
+            </Modal>
+
         </ScrollView>
     )
 }
@@ -521,5 +628,59 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         borderRadius: 25,
+    },
+    modalCenter: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    },
+    modalContainer: {
+      width: width * 0.8,
+      backgroundColor: 'white',
+      borderRadius: 20,
+      shadowColor: '#000',
+      shadowOffset: {
+        width: 0,
+        height: 2,
+      },
+      shadowOpacity: 0.25,
+      shadowRadius: 4,
+      elevation: 5,
+    },
+    headerModal: {
+      borderTopLeftRadius: 20,
+      borderTopRightRadius: 20,
+      padding: 15,
+    },
+    modalRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    modalImage: {
+      width: 40,
+      height: 40,
+      marginRight: 10,
+    },
+    modalTitle: {
+      color: '#fff',
+      fontSize: 24,
+      fontWeight: 'bold',
+    },
+    modalContent: {
+      padding: 20,
+    },
+    closeButton: {
+      backgroundColor: '#F44262',
+      padding: 10,
+      borderBottomLeftRadius: 20,
+      borderBottomRightRadius: 20,
+      alignItems: 'center',
+    },
+    closeButtonText: {
+      color: '#fff',
+      fontSize: 16,
+      fontWeight: 'bold',
     },
 });
