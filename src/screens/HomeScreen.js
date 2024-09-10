@@ -23,6 +23,8 @@ const HomeScreen = ({ logueado, setLogueado }) => {
     const [refreshing, setRefreshing] = useState(false);
     const [centerText, setCenterText] = useState("Selecciona un segmento");
     const [foto, setFoto] = useState("../../assets/man.png");
+    const [dataPie, setDataPie] = useState([]);
+    const [response, setResponse] = useState(false);
     //Estados para almacenar los datos
     const [stats, setStats] = useState({
         goles: " ",
@@ -73,25 +75,60 @@ const HomeScreen = ({ logueado, setLogueado }) => {
         }
     };
 
+    // Genera un color hexadecimal aleatorio
+    const getRandomColor = () => {
+        const letters = "0123456789ABCDEF";
+        let color = "#";
+        for (let i = 0; i < 6; i++) {
+            color += letters[Math.floor(Math.random() * 16)];
+        }
+        return color;
+    };
+    //Llena la gráfica con los datos obtenidos de la API
+    const fillGraphicDoughnut = async () => {
+        try {
+            const response = await fetchData(USER_API, "graphicMobile");
+
+            if (response.status) {
+                let data = response.dataset.map((item) => ({
+                    value: parseFloat(item.promedio, 10), // Asegúrate de que los valores sean enteros
+                    color: getRandomColor(), // Asigna colores aleatorios
+                    label: item.caracteristica,
+                    text: `${item.caracteristica}: ${parseFloat(item.promedio, 10)}`,
+                }));
+                setDataPie(data);
+                setResponse(true);
+                // RETORNA "CARACTERISTICA Y LA NOTA"
+            } else {
+                setDataPie([]);
+                setResponse(false);
+                console.log("La respuesta no contiene datos válidos:", response);
+            }
+        } catch (error) {
+            console.log("Error fetching datos de la gráfica:", error);
+            setDataPie([]);
+            setResponse(false);
+        }
+    };
+
+
     const handleProfile = () => {
         navigation.navigate('LoginNav', {
             screen: 'Profile',
         });
     };
 
-    // Datos para la gráfica circular
-    const pieData = [
-        { value: 50, color: '#00BFFF', text: 'Técnicos' },
-        { value: 20, color: '#EE9512', text: 'Físicos' },
-        { value: 15, color: '#26BFE5', text: 'Tácticos' },
-        { value: 15, color: '#EF6347', text: 'Psicológicos' },
-    ];
+    const handleGrades = () => {
+        navigation.navigate('Jornadas');
+    };
+
 
     //Efecto que se ejecuta al montar el componente para inicializar la aplicación
     useEffect(() => {
         const initializeApp = async () => {
             await getUser();
             await readStats();
+            await fillGraphicDoughnut();
         };
         initializeApp();
     }, []);
@@ -101,6 +138,7 @@ const HomeScreen = ({ logueado, setLogueado }) => {
             const initializeApp = async () => {
                 await getUser();
                 await readStats();
+                await fillGraphicDoughnut();
             };
             initializeApp();
         }, [])
@@ -110,9 +148,49 @@ const HomeScreen = ({ logueado, setLogueado }) => {
         setRefreshing(true);
         await getUser();
         await readStats();
+        await fillGraphicDoughnut();
         // Aquí se llamarán las funciones necesarias para refrescar la información
         setRefreshing(false);
     }, []);
+
+
+    // Componente para los puntos de la leyenda
+    const renderDot = color => {
+        return (
+            <View
+                style={{
+                    height: 10,
+                    width: 10,
+                    borderRadius: 5,
+                    backgroundColor: color,
+                    marginRight: 10,
+                }}
+            />
+        );
+    };
+
+    // Componente que renderiza la leyenda basada en los datos de la gráfica
+    const renderLegendComponent = () => {
+        return (
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', marginVertical: 10 }}>
+                {dataPie.map((item, index) => (
+                    <View
+                        key={index}
+                        style={{
+                            flexDirection: 'row',
+                            alignItems: 'center',
+                            marginVertical: 5,
+                            width: '45%', // Para alinear 2 en cada fila
+                            marginHorizontal: '2.5%' // Espacio entre los elementos
+                        }}>
+                        {renderDot(item.color)}
+                        <Text style={{ color: '#333', fontSize: 14 }}>{item.text}</Text>
+                    </View>
+                ))}
+            </View>
+        );
+    };
+
 
     return (
         <ScrollView
@@ -168,27 +246,50 @@ const HomeScreen = ({ logueado, setLogueado }) => {
                             <View style={styles.rowContent3}>
                                 <Text style={styles.trainingChartText}>Calificación total de entrenamientos</Text>
                             </View>
-                            <PieChart
-                                data={pieData}
-                                donut
-                                radius={100}
-                                innerRadius={50}
-                                textColor="black"
-                                textSize={12}
-                                onPress={(index) => {
-                                    setCenterText(index.text || "Selecciona un segmento");
-                                }}
-                                centerLabelComponent={() => {
-                                    return <Text style={{ fontSize: 12 }}>{centerText}</Text>;
-                                }}
-                            />
-                            <Text style={styles.chartPercentage}>Técnicos: 50%</Text>
-                            <Text style={styles.chartPercentage}>Físicos: 20%</Text>
-                            <Text style={styles.chartPercentage}>Tácticos: 15%</Text>
-                            <Text style={styles.chartPercentage}>Psicológicos: 15%</Text>
-                            <TouchableOpacity style={styles.viewtrainingButton}>
-                                <Text style={styles.viewProfileText}>Ver mas detalles</Text>
-                            </TouchableOpacity>
+                            {/*Muestra la gráfica de dona */}
+                            {response && Array.isArray(dataPie) && dataPie.length > 0 ? (
+                                <View style={styles.rowContent4}>
+                                    <PieChart
+                                        data={dataPie}
+                                        donut
+                                        radius={100}
+                                        innerRadius={50}
+                                        textColor="black"
+                                        textSize={12}
+                                        onPress={(index) => {
+                                            setCenterText(index.text || "Selecciona un segmento");
+                                        }}
+                                        centerLabelComponent={() => {
+                                            return <Text style={{ fontSize: 12 }}>{centerText}</Text>;
+                                        }}
+                                    />
+                                    {renderLegendComponent()}
+                                    <TouchableOpacity style={styles.viewtrainingButton} onPress={handleGrades}>
+                                        <Text style={styles.viewProfileText}>Ver mas detalles</Text>
+                                    </TouchableOpacity>
+                                </View>
+                            ) : (
+                                <View
+                                    style={{
+                                        height: 200,
+                                        display: "flex",
+                                        alignItems: "center",
+                                        justifyContent: "center",
+                                    }}
+                                >
+                                    <Text
+                                        style={{
+                                            backgroundColor: "#e6ecf1",
+                                            color: "#043998",
+                                            padding: 15,
+                                            borderRadius: 15,
+                                            maxWidth: 150,
+                                        }}
+                                    >
+                                        No se encontraron datos para la gráfica
+                                    </Text>
+                                </View>
+                            )}
                         </View>
                     </View>
                 </View>
@@ -317,6 +418,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: 10,
         backgroundColor: '#F44262',
         borderRadius: 5,
+        alignItems: 'center',
     },
     trainingChartContainer: {
         alignItems: 'center',
@@ -400,6 +502,9 @@ const styles = StyleSheet.create({
         alignItems: "center",
         paddingLeft: 20,
         paddingRight: 20,
+    },
+    rowContent4: {
+        alignItems: "center",
     },
     infoText: {
         marginLeft: 10,
