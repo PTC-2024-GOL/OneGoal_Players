@@ -1,5 +1,7 @@
 import React from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
+import { Ionicons } from '@expo/vector-icons'; // Importar íconos si lo deseas
+import { TouchableOpacity } from 'react-native';
 import LoginScreen from '../screens/LoginScreen';
 import WelcomeScreen from '../screens/WelcomeScreen';
 import TrainingsScreen from "../screens/TrainingsScreen";
@@ -49,13 +51,21 @@ export default function LoginNav({ logueado, setLogueado }) {
       </Stack.Screen>
       <Stack.Screen
         name='Entrenamientos'
-        options={{ headerShown: true }}
+        options={({ navigation }) => ({
+          headerShown: true,
+          headerLeft: () => (
+            <TouchableOpacity onPress={() => navigation.goBack()} style={{ marginLeft: 20 }}>
+              <Ionicons name="arrow-back" size={24} color="white" />
+            </TouchableOpacity>
+          ),
+        })}
       >
         {props => <TrainingsScreen {...props} setLogueado={setLogueado} logueado={logueado} />}
       </Stack.Screen>
       <Stack.Screen
         name='Profile'
         options={{ headerShown: false }}
+        
       >
         {props => <ProfileScreen {...props} setLogueado={setLogueado} logueado={logueado} />}
       </Stack.Screen>
