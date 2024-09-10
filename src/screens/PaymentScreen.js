@@ -1,18 +1,27 @@
-import React from 'react';
-import { View, Text, StyleSheet, ScrollView, TextInput, Image, Dimensions, TouchableOpacity } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, ScrollView, TextInput, Image, Dimensions, TouchableOpacity, Modal } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-
+import { LinearGradient } from 'expo-linear-gradient';
+ 
 const windowWidth = Dimensions.get('window').width;
-
+ 
 const PaymentScreen = () => {
+  const [modalVisible, setModalVisible] = useState(false);
+  const [selectedPayment, setSelectedPayment] = useState(null);
+ 
   const payments = [
-    { month: 'Enero', amount: 20.25, isPaid: true },
-    { month: 'Febrero', amount: 20.25, isPaid: true },
-    { month: 'Marzo', amount: 20.25, isPaid: true },
-    { month: 'Abril', amount: 20.25, isPaid: true },
-    { month: 'Mayo', amount: 20.25, isPaid: true },
+    { month: 'Enero', amount: 20.25, isPaid: true, date: '20 de enero de 2024' },
+    { month: 'Febrero', amount: 20.25, isPaid: true, date: '20 de febrero de 2024' },
+    { month: 'Marzo', amount: 20.25, isPaid: true, date: '20 de marzo de 2024' },
+    { month: 'Abril', amount: 20.25, isPaid: true, date: '20 de abril de 2024' },
+    { month: 'Mayo', amount: 20.25, isPaid: true, date: '20 de mayo de 2024' },
   ];
-
+ 
+  const openModal = (payment) => {
+    setSelectedPayment(payment);
+    setModalVisible(true);
+  };
+ 
   return (
     <View style={styles.container}>
       <Text style={styles.headerText}>Historial de Pagos</Text>
@@ -34,7 +43,7 @@ const PaymentScreen = () => {
         <Text style={[styles.tableHeaderText, styles.amountColumn]}>Cantidad</Text>
         <Text style={[styles.tableHeaderText, styles.lateColumn]}>Pago tardío</Text>
         <Text style={[styles.tableHeaderText, styles.feeColumn]}>Mora</Text>
-        <Text style={[styles.tableHeaderText, styles.monthColumn]}>Mes</Text>
+        <Text style={[styles.tableHeaderText, styles.totalColumn]}>Total</Text>
         <Text style={[styles.tableHeaderText, styles.dateColumn]}>Fecha</Text>
       </View>
       <ScrollView style={styles.scrollView}>
@@ -43,19 +52,51 @@ const PaymentScreen = () => {
             <Text style={[styles.paymentText, styles.amountColumn]}>${payment.amount.toFixed(2)}</Text>
             <Text style={[styles.paymentText, styles.lateColumn]}>No</Text>
             <Text style={[styles.paymentText, styles.feeColumn]}>$0.25</Text>
-            <Text style={[styles.paymentText, styles.monthColumn]}>{payment.month}</Text>
+            <Text style={[styles.paymentText, styles.totalColumn]}>${(payment.amount + 0.25).toFixed(2)}</Text>
             <View style={[styles.dateColumn, styles.iconContainer]}>
-              <TouchableOpacity style={[styles.iconButton, styles.blueButton]}>
+              <TouchableOpacity style={[styles.iconButton, styles.blueButton]} onPress={() => openModal(payment)}>
                 <Image source={require('../../assets/calendario.png')} style={styles.icon} />
               </TouchableOpacity>
             </View>
           </View>
         ))}
       </ScrollView>
+ 
+      {/* Modal de Fecha y Mes */}
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <View style={styles.modalCenter}>
+          <View style={styles.modalContainer}>
+            <LinearGradient colors={['#020887', '#13071E']} style={styles.headerModal}>
+              <View style={styles.modalRow}>
+                <Image style={styles.modalImage} source={require('../../assets/gol_blanco 2.png')} />
+                <Text style={styles.modalTitle}>Fecha</Text>
+              </View>
+            </LinearGradient>
+            <View style={styles.modalContent}>
+              <View style={styles.dateCard}>
+                <Text style={styles.dateText}>{selectedPayment?.date}</Text>
+                <Text style={styles.dateLabel}>Fecha de pago</Text>
+              </View>
+              <View style={styles.dateCard}>
+                <Text style={styles.dateText}>{selectedPayment?.month}</Text>
+                <Text style={styles.dateLabel}>Mes de pago</Text>
+              </View>
+            </View>
+            <TouchableOpacity style={styles.closeButton} onPress={() => setModalVisible(false)}>
+              <Text style={styles.closeButtonText}>Cerrar</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 };
-
+ 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -134,29 +175,92 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   blueButton: {
-    backgroundColor: '#3498db', 
+    backgroundColor: '#3498db',
   },
   icon: {
     width: 20,
     height: 20,
     resizeMode: 'contain',
   },
-  amountColumn: {
-    width: '20%',
+  amountColumn: { width: '20%' },
+  lateColumn: { width: '20%' },
+  feeColumn: { width: '20%' },
+  totalColumn: { width: '20%' },
+  dateColumn: { width: '20%', alignItems: 'center' },
+  modalCenter: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
-  lateColumn: {
-    width: '20%',
+  modalContainer: {
+    width: windowWidth * 0.8,
+    backgroundColor: 'white',
+    borderRadius: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
   },
-  feeColumn: {
-    width: '15%',
+  headerModal: {
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    padding: 15,
   },
-  monthColumn: {
-    width: '25%',
+  modalRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  dateColumn: {
-    width: '20%',
+  modalImage: {
+    width: 40,
+    height: 40,
+    marginRight: 10,
+  },
+  modalTitle: {
+    color: '#fff',
+    fontSize: 24,
+    fontWeight: 'bold',
+  },
+  modalContent: {
+    padding: 20,
+  },
+  dateCard: {
+    backgroundColor: '#fff',
+    padding: 16,
+    marginVertical: 8,
+    borderRadius: 8,
+    borderLeftColor: '#020887',
+    borderLeftWidth: 5,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  dateText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#000',
+  },
+  dateLabel: {
+    fontSize: 14,
+    color: '#333',
+    marginTop: 4,
+  },
+  closeButton: {
+    backgroundColor: '#F44262',
+    padding: 10,
+    borderBottomLeftRadius: 20,
+    borderBottomRightRadius: 20,
     alignItems: 'center',
   },
+  closeButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
 });
-
+ 
 export default PaymentScreen;
