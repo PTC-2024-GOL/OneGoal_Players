@@ -32,6 +32,7 @@ const HomeScreen = ({ logueado, setLogueado }) => {
     const [maxAssists, setMaxAssists] = useState([]);
     const [matches, setMatches] = useState([]);
     const [matchData, setmatchData] = useState([]);
+    const [assistsData, setAssistsData] = useState([]);
     const [data, setData] = useState(false);
     const [response, setResponse] = useState(false);
     const [response1, setResponse1] = useState(false);
@@ -139,6 +140,41 @@ const HomeScreen = ({ logueado, setLogueado }) => {
         }
     };    
 
+    
+    const fillAsistencias = async () => {
+        try {
+            const data = await fetchData(USER_API, 'asistenciasHechas');
+            if (data.status) {
+                const info = data.dataset.map(gol => {
+                    // Procesar los datos de cada gol
+                    const rivalLogo = SERVER_URL.concat('images/rivales/', gol.logo_rival);
+                    const asistencias = gol.asistencias;
+                    const fecha = gol.fecha;
+                    const resultadoPartido = gol.resultado_partido;
+                    const tipoResultadoPartido = gol.tipo_resultado_partido;
+                    const nombreRival = gol.nombre_rival;
+    
+                    return {
+                        rivalLogo: rivalLogo,
+                        asistencias: asistencias,
+                        fecha: fecha,
+                        resultado_partido: resultadoPartido,
+                        tipo_resultado_partido: tipoResultadoPartido,
+                        nombre_rival: nombreRival
+                    };
+                });
+    
+                setAssistsData(info); // Asigna los datos de los goles a tu estado
+                setData(true);
+            } else {
+                console.log(data.error);
+                setData(false);
+            }
+        } catch (e) {
+            console.log(e);
+        }
+    };    
+
     const goToPerformanceDetails = (data) => {
         setModalVisibleMatches(false);
         navigation.navigate('LoginNav', {
@@ -157,8 +193,9 @@ const HomeScreen = ({ logueado, setLogueado }) => {
         await fillMatches();
     };
 
-    const openModalAssists = () => {
+    const openModalAssists = async () => {
         setModalVisibleAssists(true);
+        await fillAsistencias();
     };
 
     const openModalMinutes = () => {
@@ -432,6 +469,25 @@ const HomeScreen = ({ logueado, setLogueado }) => {
                     <View style={styles.col}>
                         <Text style={styles.dateText}>{data.tipo_gol}</Text>
                         <Text style={styles.dateLabel}>{data.cantidad_goles}</Text>
+                    </View>
+                </View>
+            </Card>
+        );
+    };
+    const AssistsCard = ({ data }) => {
+        return (
+            <Card mode={"elevated"} style={styles.dateCard}>
+                <View style={styles.row}>
+                    {/* Sección de rival y detalles del partido */}
+                    <View style={styles.col}>
+                        <Image source={{ uri: data.rivalLogo }} style={styles.img} />
+                        <Text style={styles.dateText}>{data.nombre_rival}</Text>
+                        <Text style={styles.dateLabel}>{data.fecha}</Text>
+                        <Text style={styles.dateLabel}>{data.resultado_partido}</Text>
+                        <Text style={[styles.dateText, {color: getColorByNota(data.tipo_resultado_partido)}]}>{data.tipo_resultado_partido}</Text>
+                    </View>
+                    <View style={styles.col}>
+                        <Text style={styles.dateText}>{data.asistencias}</Text>
                     </View>
                 </View>
             </Card>
@@ -777,6 +833,11 @@ const HomeScreen = ({ logueado, setLogueado }) => {
 
                         <ScrollView>
                             <View style={styles.modalContent}>
+                                {assistsData.map((item, index) => (
+                                    <View style={styles.rowContent} key={index}>
+                                        <AssistsCard data={item} />
+                                    </View>
+                                ))}
                             </View>
                         </ScrollView>
 
