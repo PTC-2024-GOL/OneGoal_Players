@@ -2,21 +2,60 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Image, Dimensions, Modal } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
+import fetchData from '../../api/components';
 
 const windowWidth = Dimensions.get('window').width;
 const windowHeight = Dimensions.get('window').height;
 
 const MedicalHistory = () => {
+  // URL de la API para el usuario
+  const API = 'services/players/registro_medico.php';
+
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedInjury, setSelectedInjury] = useState(null);
   const [returnModalVisible, setReturnModalVisible] = useState(false);
   const [injuries, setInjuries] = useState([
-    { part: 'Tren superior', days: 4, injuryDate: '8 de noviembre 2023', returnDate: '12 de noviembre 2023' },
-    { part: 'Tren inferior', days: 10, injuryDate: '10 de noviembre 2022', returnDate: '20 de noviembre 2022' },
-    { part: 'Tren superior', days: 25, injuryDate: '1 de diciembre 2023', returnDate: '26 de diciembre 2023' },
-    { part: 'Tren inferior', days: 3, injuryDate: '5 de enero 2024', returnDate: '8 de enero 2024' },
-    { part: 'Tren superior', days: 8, injuryDate: '15 de febrero 2024', returnDate: '23 de febrero 2024' },
+    { part: 'Tren superior', days: 4, injuryDate: '8 de noviembre 2023', returnDate: '12 de noviembre 2023', returnTraining:' ', returnMatch:' '  },
+    { part: 'Tren inferior', days: 10, injuryDate: '10 de noviembre 2022', returnDate: '20 de noviembre 2022',returnTraining:' ', returnMatch:' ' },
+    { part: 'Tren superior', days: 25, injuryDate: '1 de diciembre 2023', returnDate: '26 de diciembre 2023',returnTraining:' ', returnMatch:' ' },
+    { part: 'Tren inferior', days: 3, injuryDate: '5 de enero 2024', returnDate: '8 de enero 2024',returnTraining:' ', returnMatch:' ' },
+    { part: 'Tren superior', days: 8, injuryDate: '15 de febrero 2024', returnDate: '23 de febrero 2024',returnTraining:' ', returnMatch:' ' },
   ]);
+  const [registroMedico, setRegistroMedico] = useState([]);
+  const [data, setData] = useState(false);
+
+  const fillRegistroMedico = async () => {
+    try {
+        const data = await fetchData(API, 'readAllMobile');
+        if (data.status) {
+            const info = data.dataset.map(item => {
+                const part = item.nombre_sub_tipologia;
+                const days = item.dias_lesionado;
+                const injuryDate = item.fecha_lesion;
+                const returnDate = item.fecha_registro;
+                const returnTraining=item.retorno_entreno;
+                const returnMatch=item.retorno_partido;
+
+                return {
+                    part,
+                    days,
+                    injuryDate,
+                    returnDate,
+                    returnTraining,
+                    returnMatch,
+                };
+            });
+
+            setRegistroMedico(info); 
+            setData(true);
+        } else {
+            console.log(data.error);
+            setData(false);
+        }
+    } catch (e) {
+        console.log(e);
+    }
+};    
 
   const openModal = (injury) => {
     setSelectedInjury(injury);
@@ -27,6 +66,22 @@ const MedicalHistory = () => {
     setSelectedInjury(injury);
     setReturnModalVisible(true);
   };
+
+  useEffect(() => {
+    const initializeApp = async () => {
+        await fillRegistroMedico();
+    };
+    initializeApp();
+}, []);
+
+useFocusEffect(
+    useCallback(() => {
+        const initializeApp = async () => {
+            await fillRegistroMedico();
+        };
+        initializeApp();
+    }, [])
+);
 
   return (
     <View style={styles.container}>
@@ -125,11 +180,11 @@ const MedicalHistory = () => {
             <ScrollView>
               <View style={styles.modalContent}>
                 <View style={styles.dateCard}>
-                  <Text style={styles.dateText}>{selectedInjury?.returnDate}</Text>
+                  <Text style={styles.dateText}>{selectedInjury?.returnTraining}</Text>
                   <Text style={styles.dateLabel}>Retorno a entreno</Text>
                 </View>
                 <View style={styles.dateCard}>
-                  <Text style={styles.dateText}>{selectedInjury?.returnDate}</Text>
+                  <Text style={styles.dateText}>{selectedInjury?.returnMatch}</Text>
                   <Text style={styles.dateLabel}>Retorno a partido</Text>
                 </View>
               </View>
