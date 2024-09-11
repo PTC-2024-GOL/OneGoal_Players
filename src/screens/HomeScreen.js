@@ -16,6 +16,7 @@ import LoadingComponent from "../components/LoadingComponent";
 import MatchesCard from '../components/Cards/MatchCard';
 import logo from '../../assets/gol_blanco 2.png';
 import PlayerCard from '../components/Cards/PlayerCard';
+import { Card } from 'react-native-paper';
 const { width, height } = Dimensions.get('window');
 
 // URL de la API para el usuario
@@ -30,6 +31,7 @@ const HomeScreen = ({ logueado, setLogueado }) => {
     const [maxGoals, setMaxGoals] = useState([]);
     const [maxAssists, setMaxAssists] = useState([]);
     const [matches, setMatches] = useState([]);
+    const [matchData, setmatchData] = useState([]);
     const [data, setData] = useState(false);
     const [response, setResponse] = useState(false);
     const [response1, setResponse1] = useState(false);
@@ -101,6 +103,41 @@ const HomeScreen = ({ logueado, setLogueado }) => {
         }
     };
 
+    const fillGoles = async () => {
+        try {
+            const data = await fetchData(USER_API, 'golesMarcados');
+            if (data.status) {
+                const info = data.dataset.map(gol => {
+                    // Procesar los datos de cada gol
+                    const rivalLogo = SERVER_URL.concat('images/rivales/', gol.logo_rival);
+                    const tipoGol = gol.TIPO;
+                    const cantidadGoles = gol.CANTIDAD;
+                    const fecha = gol.fecha;
+                    const resultadoPartido = gol.resultado_partido;
+                    const tipoResultadoPartido = gol.tipo_resultado_partido;
+                    const nombreRival = gol.nombre_rival;
+    
+                    return {
+                        rivalLogo: rivalLogo,
+                        tipo_gol: tipoGol,
+                        cantidad_goles: cantidadGoles,
+                        fecha: fecha,
+                        resultado_partido: resultadoPartido,
+                        tipo_resultado_partido: tipoResultadoPartido,
+                        nombre_rival: nombreRival
+                    };
+                });
+    
+                setmatchData(info); // Asigna los datos de los goles a tu estado
+                setData(true);
+            } else {
+                console.log(data.error);
+                setData(false);
+            }
+        } catch (e) {
+            console.log(e);
+        }
+    };    
 
     const goToPerformanceDetails = (data) => {
         setModalVisibleMatches(false);
@@ -110,8 +147,9 @@ const HomeScreen = ({ logueado, setLogueado }) => {
         });
     };
 
-    const openModalGoals = () => {
+    const openModalGoals = async () => {
         setModalVisibleGoals(true);
+        await fillGoles();
     };
 
     const openModalMatches = async () => {
@@ -369,6 +407,36 @@ const HomeScreen = ({ logueado, setLogueado }) => {
     const renderPlayerItem = ({ item }) => (
         <PlayerCard item={item} />
     );
+    
+    // Método para asignar un color según la nota
+    const getColorByNota = (result) => {
+        if (result == 'Victoria') return '#004000';
+        if (result == 'Pendiente') return '#FFD700'; 
+        if (result == 'Derrota') return '#8B0000'; 
+        if (result == 'Empate') return '#d86628'; 
+    };
+    const GolCard = ({ data }) => {
+        return (
+            <Card mode={"elevated"} style={styles.dateCard}>
+                <View style={styles.row}>
+                    {/* Sección de rival y detalles del partido */}
+                    <View style={styles.col}>
+                        <Image source={{ uri: data.rivalLogo }} style={styles.img} />
+                        <Text style={styles.dateText}>{data.nombre_rival}</Text>
+                        <Text style={styles.dateLabel}>{data.fecha}</Text>
+                        <Text style={styles.dateLabel}>{data.resultado_partido}</Text>
+                        <Text style={[styles.dateText, {color: getColorByNota(data.tipo_resultado_partido)}]}>{data.tipo_resultado_partido}</Text>
+                    </View>
+
+                    {/* Sección de tipo de gol y cantidad */}
+                    <View style={styles.col}>
+                        <Text style={styles.dateText}>{data.tipo_gol}</Text>
+                        <Text style={styles.dateLabel}>{data.cantidad_goles}</Text>
+                    </View>
+                </View>
+            </Card>
+        );
+    };
 
     return (
         <ScrollView
@@ -627,7 +695,11 @@ const HomeScreen = ({ logueado, setLogueado }) => {
 
                         <ScrollView>
                             <View style={styles.modalContent}>
-
+                                {matchData.map((item, index) => (
+                                    <View style={styles.rowContent} key={index}>
+                                        <GolCard data={item} />
+                                    </View>
+                                ))}
                             </View>
                         </ScrollView>
 
@@ -1102,5 +1174,45 @@ const styles = StyleSheet.create({
         fontSize: 14,
         flex: 1,
         textAlign: 'center',
+    },
+    dateCard: {
+        backgroundColor: '#fff',
+        padding: 16,
+        marginVertical: 8,
+        borderRadius: 8,
+        borderStartColor: '#020887',
+        borderStartWidth: 5,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.25,
+        shadowRadius: 4,
+        elevation: 5,
+        width: width * 0.7,
+        maxHeight: height * 0.25, // Asegura una altura mínima
+    },
+    dateText: {
+        fontSize: 16,
+        fontWeight: 'bold',
+        color: '#000',
+    },
+    dateLabel: {
+        fontSize: 14,
+        color: '#333',
+    },
+    row: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
+    },
+    col: {
+        flexDirection: "column",
+        alignItems: "center",
+        flex: 1,
+    },
+    img: {
+        width: 50,
+        height: 50,
+        borderRadius: 100,
+        marginBottom: 8,
     },
 });
