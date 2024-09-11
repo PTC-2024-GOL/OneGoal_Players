@@ -13,7 +13,7 @@ import fetchData from '../../api/components';
 import { SERVER_URL } from "../../api/constantes";
 import { useNavigation } from '@react-navigation/native';
 import LoadingComponent from "../components/LoadingComponent";
-
+import MatchesCard from '../components/Cards/MatchCard';
 import logo from '../../assets/gol_blanco 2.png';
 import PlayerCard from '../components/Cards/PlayerCard';
 const { width, height } = Dimensions.get('window');
@@ -29,6 +29,8 @@ const HomeScreen = ({ logueado, setLogueado }) => {
     const [loading, setLoading] = useState(true); // Estado para controlar la carga inicial
     const [maxGoals, setMaxGoals] = useState([]);
     const [maxAssists, setMaxAssists] = useState([]);
+    const [matches, setMatches] = useState([]);
+    const [data, setData] = useState(false);
     const [response, setResponse] = useState(false);
     const [response1, setResponse1] = useState(false);
     const [response2, setResponse2] = useState(false);
@@ -52,12 +54,69 @@ const HomeScreen = ({ logueado, setLogueado }) => {
     const [modalVisibleYellowCards, setModalVisibleYellowCards] = useState(false);
     const [modalVisibleRedCards, setModalVisibleRedCards] = useState(false);
 
+    const fillMatches = async () => {
+        try {
+            const data = await fetchData(USER_API, 'partidosJugados');
+            if (data.status) {
+                const info = data.dataset.map(match => {
+                    let equipoIzquierda, equipoDerecha, logoIzquierda, logoDerecha, resultadoAjustado;
+
+                    if (match.localidad_partido === 'Local') {
+                        // Si es local, mantener el orden normal.
+                        equipoIzquierda = match.nombre_equipo;
+                        equipoDerecha = match.nombre_rival;
+                        logoIzquierda = SERVER_URL.concat('images/equipos/', match.logo_equipo);
+                        logoDerecha = SERVER_URL.concat('images/rivales/', match.logo_rival);
+                        resultadoAjustado = match.resultado_partido;
+                    } else {
+                        // Si es visitante, invertir los equipos y el resultado.
+                        equipoIzquierda = match.nombre_rival;
+                        equipoDerecha = match.nombre_equipo;
+                        logoIzquierda = SERVER_URL.concat('images/rivales/', match.logo_rival);
+                        logoDerecha = SERVER_URL.concat('images/equipos/', match.logo_equipo);
+
+                        // Invertir el resultado (p.ej., de "2-1" a "1-2").
+                        const goles = match.resultado_partido.split('-').map(gol => gol.trim());
+                        resultadoAjustado = `${goles[1]} - ${goles[0]}`;
+                    }
+
+                    return {
+                        ...match,
+                        equipoIzquierda,
+                        equipoDerecha,
+                        logoIzquierda,
+                        logoDerecha,
+                        resultadoAjustado
+                    };
+                });
+
+                setMatches(info);
+                setData(true);
+            } else {
+                console.log(data.error);
+                setData(false);
+            }
+        } catch (e) {
+            console.log(e);
+        }
+    };
+
+
+    const goToPerformanceDetails = (data) => {
+        setModalVisibleMatches(false);
+        navigation.navigate('LoginNav', {
+            screen: 'RendimientoDetalle',
+            params: { data }
+        });
+    };
+
     const openModalGoals = () => {
         setModalVisibleGoals(true);
     };
 
-    const openModalMatches = () => {
+    const openModalMatches = async () => {
         setModalVisibleMatches(true);
+        await fillMatches();
     };
 
     const openModalAssists = () => {
@@ -496,7 +555,7 @@ const HomeScreen = ({ logueado, setLogueado }) => {
                                 >
                                     <View style={{ height: 200, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                         <Image style={{ height: 80, width: 80, marginBottom: 10 }} source={require('../../assets/find.png')} />
-                                        <Text style={{ backgroundColor: '#e6ecf1', color: '#043998', padding: 20, borderRadius: 15, maxWidth: 300 }}>No se encontraron entrenamientos</Text>
+                                        <Text style={{ backgroundColor: '#e6ecf1', color: '#043998', padding: 20, borderRadius: 15, maxWidth: 300 }}>No se encontraron datos de goleadores</Text>
                                     </View>
                                 </ScrollView>
                             )}
@@ -540,7 +599,7 @@ const HomeScreen = ({ logueado, setLogueado }) => {
                                 >
                                     <View style={{ height: 200, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                         <Image style={{ height: 80, width: 80, marginBottom: 10 }} source={require('../../assets/find.png')} />
-                                        <Text style={{ backgroundColor: '#e6ecf1', color: '#043998', padding: 20, borderRadius: 15, maxWidth: 300 }}>No se encontraron entrenamientos</Text>
+                                        <Text style={{ backgroundColor: '#e6ecf1', color: '#043998', padding: 20, borderRadius: 15, maxWidth: 300 }}>No se encontraron datos de asistentes</Text>
                                     </View>
                                 </ScrollView>
                             )}
@@ -597,13 +656,27 @@ const HomeScreen = ({ logueado, setLogueado }) => {
                                 <Text style={styles.modalTitle}>Partidos</Text>
                             </View>
                         </LinearGradient>
-
                         <ScrollView>
-                            <View style={styles.modalContent}>
-
+                            <View style={styles.cardsContainer}>
+                                {
+                                    data ? (
+                                        matches.map((item, index) => (
+                                            <MatchesCard
+                                                key={index}
+                                                data={item}
+                                                teamImg={item.logoIzquierda}
+                                                rivalImg={item.logoDerecha}
+                                                goToScreen={goToPerformanceDetails}
+                                            />
+                                        ))
+                                    ) : (
+                                        <View>
+                                            <Text>Aún no has tenido partidos</Text>
+                                        </View>
+                                    )
+                                }
                             </View>
                         </ScrollView>
-
                         <TouchableOpacity
                             style={styles.closeButton}
                             onPress={() => setModalVisibleMatches(false)}
@@ -961,6 +1034,8 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.25,
         shadowRadius: 4,
         elevation: 5,
+        marginTop: height * 0.07,
+        marginBottom: height * 0.13,
     },
     headerModal: {
         borderTopLeftRadius: 20,
