@@ -33,6 +33,9 @@ const HomeScreen = ({ logueado, setLogueado }) => {
     const [matches, setMatches] = useState([]);
     const [matchData, setmatchData] = useState([]);
     const [assistsData, setAssistsData] = useState([]);
+    const [minutesData, setMinutesData] = useState([]);
+    const [yellowData, setYellowData] = useState([]);
+    const [redData, setRedData] = useState([]);
     const [data, setData] = useState(false);
     const [response, setResponse] = useState(false);
     const [response1, setResponse1] = useState(false);
@@ -117,7 +120,7 @@ const HomeScreen = ({ logueado, setLogueado }) => {
                     const resultadoPartido = gol.resultado_partido;
                     const tipoResultadoPartido = gol.tipo_resultado_partido;
                     const nombreRival = gol.nombre_rival;
-    
+
                     return {
                         rivalLogo: rivalLogo,
                         tipo_gol: tipoGol,
@@ -128,7 +131,7 @@ const HomeScreen = ({ logueado, setLogueado }) => {
                         nombre_rival: nombreRival
                     };
                 });
-    
+
                 setmatchData(info); // Asigna los datos de los goles a tu estado
                 setData(true);
             } else {
@@ -138,9 +141,9 @@ const HomeScreen = ({ logueado, setLogueado }) => {
         } catch (e) {
             console.log(e);
         }
-    };    
+    };
 
-    
+
     const fillAsistencias = async () => {
         try {
             const data = await fetchData(USER_API, 'asistenciasHechas');
@@ -153,7 +156,7 @@ const HomeScreen = ({ logueado, setLogueado }) => {
                     const resultadoPartido = gol.resultado_partido;
                     const tipoResultadoPartido = gol.tipo_resultado_partido;
                     const nombreRival = gol.nombre_rival;
-    
+
                     return {
                         rivalLogo: rivalLogo,
                         asistencias: asistencias,
@@ -163,7 +166,7 @@ const HomeScreen = ({ logueado, setLogueado }) => {
                         nombre_rival: nombreRival
                     };
                 });
-    
+
                 setAssistsData(info); // Asigna los datos de los goles a tu estado
                 setData(true);
             } else {
@@ -173,7 +176,114 @@ const HomeScreen = ({ logueado, setLogueado }) => {
         } catch (e) {
             console.log(e);
         }
-    };    
+    };
+
+
+    const fillMinutes = async () => {
+        try {
+            const data = await fetchData(USER_API, 'minutosJugados');
+            if (data.status) {
+                const info = data.dataset.map(gol => {
+                    // Procesar los datos de cada gol
+                    const rivalLogo = SERVER_URL.concat('images/rivales/', gol.logo_rival);
+                    const minutos_jugados = gol.minutos_jugados;
+                    const fecha = gol.fecha;
+                    const resultadoPartido = gol.resultado_partido;
+                    const tipoResultadoPartido = gol.tipo_resultado_partido;
+                    const nombreRival = gol.nombre_rival;
+
+                    return {
+                        rivalLogo: rivalLogo,
+                        minutos_jugados: minutos_jugados,
+                        fecha: fecha,
+                        resultado_partido: resultadoPartido,
+                        tipo_resultado_partido: tipoResultadoPartido,
+                        nombre_rival: nombreRival
+                    };
+                });
+
+                setMinutesData(info); // Asigna los datos de los goles a tu estado
+                setData(true);
+            } else {
+                console.log(data.error);
+                setData(false);
+            }
+        } catch (e) {
+            console.log(e);
+        }
+    };
+
+    const fillYellowsCards = async () => {
+        try {
+            const data = await fetchData(USER_API, 'contarTarjetasAmarillas');
+            if (data.status) {
+                const info = data.dataset.map(gol => {
+                    // Procesar los datos de cada gol
+                    const rivalLogo = SERVER_URL.concat('images/rivales/', gol.logo_rival);
+                    const amonestacion = gol.amonestacion;
+                    const numero_amonestacion = gol.numero_amonestacion;
+                    const fecha = gol.fecha;
+                    const resultadoPartido = gol.resultado_partido;
+                    const tipoResultadoPartido = gol.tipo_resultado_partido;
+                    const nombreRival = gol.nombre_rival;
+
+                    return {
+                        rivalLogo: rivalLogo,
+                        amonestacion: amonestacion,
+                        numero_amonestacion: numero_amonestacion,
+                        fecha: fecha,
+                        resultado_partido: resultadoPartido,
+                        tipo_resultado_partido: tipoResultadoPartido,
+                        nombre_rival: nombreRival
+                    };
+                });
+
+                setYellowData(info); // Asigna los datos de los goles a tu estado
+                setData(true);
+            } else {
+                console.log(data.error);
+                setData(false);
+            }
+        } catch (e) {
+            console.log(e);
+        }
+    };
+
+    const fillRedCards = async () => {
+        try {
+            const data = await fetchData(USER_API, 'contarTarjetasRojas');
+            if (data.status) {
+                const info = data.dataset.map(gol => {
+                    // Procesar los datos de cada gol
+                    const rivalLogo = SERVER_URL.concat('images/rivales/', gol.logo_rival);
+                    const amonestacion = gol.amonestacion;
+                    const numero_amonestacion = gol.numero_amonestacion;
+                    const fecha = gol.fecha;
+                    const resultadoPartido = gol.resultado_partido;
+                    const tipoResultadoPartido = gol.tipo_resultado_partido;
+                    const nombreRival = gol.nombre_rival;
+
+                    return {
+                        rivalLogo: rivalLogo,
+                        amonestacion: amonestacion,
+                        numero_amonestacion: numero_amonestacion,
+                        fecha: fecha,
+                        resultado_partido: resultadoPartido,
+                        tipo_resultado_partido: tipoResultadoPartido,
+                        nombre_rival: nombreRival
+                    };
+                });
+
+                setRedData(info); // Asigna los datos de los goles a tu estado
+                setData(true);
+            } else {
+                console.log(data.error);
+                setData(false);
+            }
+        } catch (e) {
+            console.log(e);
+        }
+    };
 
     const goToPerformanceDetails = (data) => {
         setModalVisibleMatches(false);
@@ -198,16 +308,19 @@ const HomeScreen = ({ logueado, setLogueado }) => {
         await fillAsistencias();
     };
 
-    const openModalMinutes = () => {
+    const openModalMinutes = async () => {
         setModalVisibleMinutes(true);
+        await fillMinutes();
     };
 
-    const openModalYellowCards = () => {
+    const openModalYellowCards = async () => {
         setModalVisibleYellowCards(true);
+        await fillYellowsCards();
     };
 
-    const openModalRedCards = () => {
+    const openModalRedCards = async () => {
         setModalVisibleRedCards(true);
+        await fillRedCards();
     };
 
     //Leer las estadisticas que tiene el jugador
@@ -444,13 +557,18 @@ const HomeScreen = ({ logueado, setLogueado }) => {
     const renderPlayerItem = ({ item }) => (
         <PlayerCard item={item} />
     );
-    
+
     // Método para asignar un color según la nota
     const getColorByNota = (result) => {
         if (result == 'Victoria') return '#004000';
-        if (result == 'Pendiente') return '#FFD700'; 
-        if (result == 'Derrota') return '#8B0000'; 
-        if (result == 'Empate') return '#d86628'; 
+        if (result == 'Pendiente') return '#FFD700';
+        if (result == 'Derrota') return '#fa1405';
+        if (result == 'Empate') return '#fadc05';
+    };
+    // Método para asignar un color según la nota
+    const getColorByCard = (result) => {
+        if (result == 'Tarjeta amarilla') return '#fadc05';
+        if (result == 'Tarjeta roja') return '#fa1405';
     };
     const GolCard = ({ data }) => {
         return (
@@ -462,7 +580,7 @@ const HomeScreen = ({ logueado, setLogueado }) => {
                         <Text style={styles.dateText}>{data.nombre_rival}</Text>
                         <Text style={styles.dateLabel}>{data.fecha}</Text>
                         <Text style={styles.dateLabel}>{data.resultado_partido}</Text>
-                        <Text style={[styles.dateText, {color: getColorByNota(data.tipo_resultado_partido)}]}>{data.tipo_resultado_partido}</Text>
+                        <Text style={[styles.dateText, { color: getColorByNota(data.tipo_resultado_partido) }]}>{data.tipo_resultado_partido}</Text>
                     </View>
 
                     {/* Sección de tipo de gol y cantidad */}
@@ -484,10 +602,69 @@ const HomeScreen = ({ logueado, setLogueado }) => {
                         <Text style={styles.dateText}>{data.nombre_rival}</Text>
                         <Text style={styles.dateLabel}>{data.fecha}</Text>
                         <Text style={styles.dateLabel}>{data.resultado_partido}</Text>
-                        <Text style={[styles.dateText, {color: getColorByNota(data.tipo_resultado_partido)}]}>{data.tipo_resultado_partido}</Text>
+                        <Text style={styles.dateText}>{data.tipo_resultado_partido}</Text>
                     </View>
                     <View style={styles.col}>
                         <Text style={styles.dateText}>{data.asistencias}</Text>
+                    </View>
+                </View>
+            </Card>
+        );
+    };
+    const MinutesCard = ({ data }) => {
+        return (
+            <Card mode={"elevated"} style={styles.dateCard}>
+                <View style={styles.row}>
+                    {/* Sección de rival y detalles del partido */}
+                    <View style={styles.col}>
+                        <Image source={{ uri: data.rivalLogo }} style={styles.img} />
+                        <Text style={styles.dateText}>{data.nombre_rival}</Text>
+                        <Text style={styles.dateLabel}>{data.fecha}</Text>
+                        <Text style={styles.dateLabel}>{data.resultado_partido}</Text>
+                        <Text style={[styles.dateText, { color: getColorByNota(data.tipo_resultado_partido) }]}>{data.tipo_resultado_partido}</Text>
+                    </View>
+                    <View style={styles.col}>
+                        <Text style={styles.dateText}>{data.minutos_jugados}🧭</Text>
+                    </View>
+                </View>
+            </Card>
+        );
+    };
+    const YellowCard = ({ data }) => {
+        return (
+            <Card mode={"elevated"} style={styles.dateCard}>
+                <View style={styles.row}>
+                    {/* Sección de rival y detalles del partido */}
+                    <View style={styles.col}>
+                        <Image source={{ uri: data.rivalLogo }} style={styles.img} />
+                        <Text style={styles.dateText}>{data.nombre_rival}</Text>
+                        <Text style={styles.dateLabel}>{data.fecha}</Text>
+                        <Text style={styles.dateLabel}>{data.resultado_partido}</Text>
+                        <Text style={[styles.dateText, { color: getColorByNota(data.tipo_resultado_partido) }]}>{data.tipo_resultado_partido}</Text>
+                    </View>
+                    <View style={styles.col}>
+                    <Text style={[styles.dateText, { color: getColorByCard(data.amonestacion) }]}>{data.amonestacion}</Text>
+                        <Text style={styles.dateLabel}>{data.numero_amonestacion}</Text>
+                    </View>
+                </View>
+            </Card>
+        );
+    };
+    const RedCard = ({ data }) => {
+        return (
+            <Card mode={"elevated"} style={styles.dateCard}>
+                <View style={styles.row}>
+                    {/* Sección de rival y detalles del partido */}
+                    <View style={styles.col}>
+                        <Image source={{ uri: data.rivalLogo }} style={styles.img} />
+                        <Text style={styles.dateText}>{data.nombre_rival}</Text>
+                        <Text style={styles.dateLabel}>{data.fecha}</Text>
+                        <Text style={styles.dateLabel}>{data.resultado_partido}</Text>
+                        <Text style={[styles.dateText, { color: getColorByNota(data.tipo_resultado_partido) }]}>{data.tipo_resultado_partido}</Text>
+                    </View>
+                    <View style={styles.col}>
+                        <Text style={[styles.dateText, { color: getColorByCard(data.amonestacion) }]}>{data.amonestacion}</Text>
+                        <Text style={styles.dateLabel}>{data.numero_amonestacion}</Text>
                     </View>
                 </View>
             </Card>
@@ -870,7 +1047,11 @@ const HomeScreen = ({ logueado, setLogueado }) => {
 
                         <ScrollView>
                             <View style={styles.modalContent}>
-
+                                {minutesData.map((item, index) => (
+                                    <View style={styles.rowContent} key={index}>
+                                        <MinutesCard data={item} />
+                                    </View>
+                                ))}
                             </View>
                         </ScrollView>
 
@@ -902,7 +1083,11 @@ const HomeScreen = ({ logueado, setLogueado }) => {
 
                         <ScrollView>
                             <View style={styles.modalContent}>
-
+                                {yellowData.map((item, index) => (
+                                    <View style={styles.rowContent} key={index}>
+                                        <YellowCard data={item} />
+                                    </View>
+                                ))}
                             </View>
                         </ScrollView>
 
@@ -934,6 +1119,11 @@ const HomeScreen = ({ logueado, setLogueado }) => {
 
                         <ScrollView>
                             <View style={styles.modalContent}>
+                                {redData.map((item, index) => (
+                                    <View style={styles.rowContent} key={index}>
+                                        <RedCard data={item} />
+                                    </View>
+                                ))}
                             </View>
                         </ScrollView>
 
