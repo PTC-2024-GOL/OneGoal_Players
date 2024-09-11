@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Image, Dimensions, Modal } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import fetchData from '../../api/components';
+import { useFocusEffect } from "@react-navigation/native";
 
 const windowWidth = Dimensions.get('window').width;
 const windowHeight = Dimensions.get('window').height;
@@ -34,7 +35,7 @@ const MedicalHistory = () => {
                 const injuryDate = item.fecha_lesion;
                 const returnDate = item.fecha_registro;
                 const returnTraining=item.retorno_entreno;
-                const returnMatch=item.retorno_partido;
+                const returnMatch=item.fecha_partido;
 
                 return {
                     part,
@@ -46,7 +47,7 @@ const MedicalHistory = () => {
                 };
             });
 
-            setRegistroMedico(info); 
+            setInjuries(info); 
             setData(true);
         } else {
             console.log(data.error);
