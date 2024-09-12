@@ -14,6 +14,7 @@ import MatchesCard from "../components/Cards/MatchesCard";
 import {SERVER_URL} from "../../api/constantes";
 
 const width = Dimensions.get('window').width;
+const height = Dimensions.get('window').height;
 
 const PerformanceScreen = ({ logueado, setLogueado }) => {
     Fonts();
@@ -143,7 +144,7 @@ const styles = StyleSheet.create({
     },
     container: {
         marginHorizontal: width * 0.05,
-        marginBottom: 50
+        marginBottom: height * 0.4
     },
     title: {
         fontSize: 20,
