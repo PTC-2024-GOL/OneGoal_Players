@@ -17,6 +17,8 @@ import MatchesCard from '../components/Cards/MatchCard';
 import logo from '../../assets/gol_blanco 2.png';
 import PlayerCard from '../components/Cards/PlayerCard';
 import { Card } from 'react-native-paper';
+import { AlertNotificationRoot } from "react-native-alert-notification";
+import { DialogNotification, ToastNotification } from "../components/Alerts/AlertComponent";
 const { width, height } = Dimensions.get('window');
 
 // URL de la API para el usuario
@@ -40,6 +42,19 @@ const HomeScreen = ({ logueado, setLogueado }) => {
     const [response, setResponse] = useState(false);
     const [response1, setResponse1] = useState(false);
     const [response2, setResponse2] = useState(false);
+    const [searchQuery, setSearchQuery] = useState("");
+    //Constantes para la busqueda con el elemento de la libreria searchBar
+    const onChangeSearch = (query) => setSearchQuery(query);
+
+    const onSearch = () => {
+        if (searchQuery != "") {
+            // Navegar a la pantalla SearchScreen y pasar el query como parámetro
+            navigation.navigate('SearchScreen', { searchQuery });
+        } else {
+            ToastNotification(2, "No puedes dejar el campo de busqueda vacio", true);
+        }
+    };
+
     //Estados para almacenar los datos
     const [stats, setStats] = useState({
         goles: " ",
@@ -643,7 +658,7 @@ const HomeScreen = ({ logueado, setLogueado }) => {
                         <Text style={[styles.dateText, { color: getColorByNota(data.tipo_resultado_partido) }]}>{data.tipo_resultado_partido}</Text>
                     </View>
                     <View style={styles.col}>
-                    <Text style={[styles.dateText, { color: getColorByCard(data.amonestacion) }]}>{data.amonestacion}</Text>
+                        <Text style={[styles.dateText, { color: getColorByCard(data.amonestacion) }]}>{data.amonestacion}</Text>
                         <Text style={styles.dateLabel}>{data.numero_amonestacion}</Text>
                     </View>
                 </View>
@@ -672,471 +687,522 @@ const HomeScreen = ({ logueado, setLogueado }) => {
     };
 
     return (
-        <ScrollView
-            style={styles.container}
-            refreshControl={
-                <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="white" colors={['white', 'white', 'white']}
-                    progressBackgroundColor="#020887" />}
-        >
-            <LinearGradient colors={['#F2F7FF', '#F2F7FF']} style={styles.linearGradient}>
-                {/* Imagen Superior con Texto y Buscador */}
-                <View style={styles.headerContainer}>
-                    <Image
-                        source={require('../../assets/home.png')}  // Asegúrate de usar la ruta correcta a la imagen
-                        style={styles.headerImage}
-                    />
-                    <View style={styles.headerOverlay}>
-                        <Image source={logo} style={styles.logo} />
-                        <Text style={styles.headerText}>Es un placer tenerte de regreso</Text>
-                        <Text style={styles.headerSubText}>“Nunca pierdas de vista tus sueños, ellos son la clave de tu éxito”</Text>
-                        <Searchbar
-                            placeholder="Buscar partido..."
-                            placeholderTextColor='gray'
-                            style={styles.searchbar}
+        <AlertNotificationRoot>
+            <ScrollView
+                style={styles.container}
+                refreshControl={
+                    <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="white" colors={['white', 'white', 'white']}
+                        progressBackgroundColor="#020887" />}
+            >
+                <LinearGradient colors={['#F2F7FF', '#F2F7FF']} style={styles.linearGradient}>
+                    {/* Imagen Superior con Texto y Buscador */}
+                    <View style={styles.headerContainer}>
+                        <Image
+                            source={require('../../assets/home.png')}  // Asegúrate de usar la ruta correcta a la imagen
+                            style={styles.headerImage}
                         />
-                    </View>
-                </View>
-
-                {/* Sección de Perfil */}
-                <View style={styles.inputContainer}>
-                    <View style={styles.infoRow}>
-                        <View style={styles.rowContent2}>
-                            <AntDesign name="user" size={24} />
-                            <Text style={styles.label}>Mi perfil</Text>
-                        </View>
-                        <View style={styles.rowContent}>
-                            <Image
-                                source={{ uri: foto }} // Reemplaza con la URL de la imagen o usa require para imagen local
-                                style={styles.profileImage}
+                        <View style={styles.headerOverlay}>
+                            <Image source={logo} style={styles.logo} />
+                            <Text style={styles.headerText}>Es un placer tenerte de regreso</Text>
+                            <Text style={styles.headerSubText}>“Nunca pierdas de vista tus sueños, ellos son la clave de tu éxito”</Text>
+                            <Searchbar
+                                placeholder="Buscar partido..."
+                                placeholderTextColor='gray'
+                                style={styles.searchbar}
+                                value={searchQuery}
+                                onChangeText={onChangeSearch}
+                                onIconPress={onSearch}
                             />
-                            <View>
-                                <Text style={styles.profileName}>{username}</Text>
-                                <TouchableOpacity style={styles.viewProfileButton} onPress={handleProfile}>
-                                    <Text style={styles.viewProfileText}>Ver mi perfil</Text>
-                                </TouchableOpacity>
-                            </View>
                         </View>
                     </View>
-                </View>
-                <View style={styles.centrar}>
-                    <View style={styles.infoRowGraphic}>
-                        {/* Gráfica de Progreso de Entrenamientos */}
-                        <View style={styles.trainingChartContainer}>
-                            <View style={styles.rowContent3}>
-                                <Text style={styles.trainingChartText}>Calificación total de entrenamientos</Text>
+
+                    {/* Sección de Perfil */}
+                    <View style={styles.inputContainer}>
+                        <View style={styles.infoRow}>
+                            <View style={styles.rowContent2}>
+                                <AntDesign name="user" size={24} />
+                                <Text style={styles.label}>Mi perfil</Text>
                             </View>
-                            {/*Muestra la gráfica de dona */}
-                            {response && Array.isArray(dataPie) && dataPie.length > 0 ? (
-                                <View style={styles.rowContent4}>
-                                    <PieChart
-                                        data={dataPie}
-                                        donut
-                                        radius={100}
-                                        innerRadius={50}
-                                        textColor="black"
-                                        textSize={12}
-                                        showGradient
-                                        onPress={(index) => {
-                                            setCenterText(index.text || "Selecciona un segmento");
-                                        }}
-                                        centerLabelComponent={() => {
-                                            return <Text style={{ fontSize: 12 }}>{centerText}</Text>;
-                                        }}
-                                    />
-                                    {renderLegendComponent()}
-                                    <TouchableOpacity style={styles.viewtrainingButton} onPress={handleGrades}>
-                                        <Text style={styles.viewProfileText}>Ver mas detalles</Text>
+                            <View style={styles.rowContent}>
+                                <Image
+                                    source={{ uri: foto }} // Reemplaza con la URL de la imagen o usa require para imagen local
+                                    style={styles.profileImage}
+                                />
+                                <View>
+                                    <Text style={styles.profileName}>{username}</Text>
+                                    <TouchableOpacity style={styles.viewProfileButton} onPress={handleProfile}>
+                                        <Text style={styles.viewProfileText}>Ver mi perfil</Text>
                                     </TouchableOpacity>
                                 </View>
-                            ) : (
-                                <View
-                                    style={{
-                                        height: 200,
-                                        display: "flex",
-                                        alignItems: "center",
-                                        justifyContent: "center",
-                                    }}
-                                >
-                                    <View style={{ height: 200, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                        <Image style={{ height: 80, width: 80, marginBottom: 10 }} source={require('../../assets/find.png')} />
-                                        <Text style={{ backgroundColor: '#e6ecf1', color: '#043998', padding: 20, borderRadius: 15, maxWidth: 300 }}>No se encontraron datos para la graficas</Text>
-                                    </View>
-                                </View>
-                            )}
+                            </View>
                         </View>
                     </View>
-                </View>
-
-                {/* Sección de Estadísticas */}
-                <View style={styles.statsContainer}>
-                    <Surface style={[styles.surface, { backgroundColor: '#020887' }]} elevation={5}>
-                        <TouchableOpacity style={styles.statBox} onPress={() => openModalMatches()}>
-                            <MaterialCommunityIcons name="soccer-field" size={24} color="white" />
-                            <Text style={styles.statValue}>{stats.partidos}</Text>
-                            <Text style={styles.statLabel}>Total partidos</Text>
-                        </TouchableOpacity>
-                    </Surface>
-                    <Surface style={[styles.surface, { backgroundColor: '#5209B0' }]} elevation={5}>
-                        <TouchableOpacity style={styles.statBox} onPress={() => openModalGoals()}>
-                            <MaterialCommunityIcons name="soccer" size={24} color="white" />
-                            <Text style={styles.statValue}>{stats.goles}</Text>
-                            <Text style={styles.statLabel}>Total goles</Text>
-                        </TouchableOpacity>
-                    </Surface>
-                    <Surface style={[styles.surface, { backgroundColor: '#020887' }]} elevation={5}>
-                        <TouchableOpacity style={styles.statBox} onPress={() => openModalAssists()}>
-                            <MaterialCommunityIcons name="shoe-cleat" size={24} color="white" />
-                            <Text style={styles.statValue}>{stats.asistencias}</Text>
-                            <Text style={styles.statLabel}>Total asistencias</Text>
-                        </TouchableOpacity>
-                    </Surface>
-                </View>
-
-                {/* Sección de Estadísticas 2*/}
-                <View style={styles.statsContainer}>
-                    <Surface style={[styles.surface, { backgroundColor: '#5209B0' }]} elevation={5}>
-                        <TouchableOpacity style={styles.statBox} onPress={() => openModalMinutes()}>
-                            <MaterialCommunityIcons name="camera-timer" size={24} color="white" />
-                            <Text style={styles.statValue}>{stats.minutos}</Text>
-                            <Text style={styles.statLabel}>Minutos jugados</Text>
-                        </TouchableOpacity>
-                    </Surface>
-                    <Surface style={[styles.surface, { backgroundColor: '#dac002' }]} elevation={5}>
-                        <TouchableOpacity style={styles.statBox} onPress={() => openModalYellowCards()}>
-                            <MaterialCommunityIcons name="card" size={24} color="white" />
-                            <Text style={styles.statValue}>{stats.amarillas}</Text>
-                            <Text style={styles.statLabel}>Tarjetas amarillas</Text>
-                        </TouchableOpacity>
-                    </Surface>
-                    <Surface style={[styles.surface, { backgroundColor: '#bd1100' }]} elevation={5}>
-                        <TouchableOpacity style={styles.statBox} onPress={() => openModalRedCards()}>
-                            <MaterialCommunityIcons name="card" size={24} color="white" />
-                            <Text style={styles.statValue}>{stats.rojas}</Text>
-                            <Text style={styles.statLabel}>Tarjetas rojas</Text>
-                        </TouchableOpacity>
-                    </Surface>
-                </View>
-
-
-
-                {/* Comparación con el resto del equipo */}
-                <View style={styles.centrar}>
-                    <View style={styles.infoRowGraphic}>
-                        <View style={styles.trainingChartContainer}>
-                            <View style={styles.rowContent3}>
-                                <Text style={styles.trainingChartText}>Máximos goleadores</Text>
-                            </View>
-                            <View style={styles.tableHeader}>
-                                <Text style={styles.tableHeaderText}>Jugador</Text>
-                                <Text style={styles.tableHeaderText}>
-                                    <MaterialCommunityIcons name="soccer" size={20} color="white" />
-                                </Text>
-                            </View>
-                            {loading ? (
-                                <LoadingComponent />
-                            ) : response1 && Array.isArray(maxGoals) && maxGoals.length > 0 ? (
-                                <View
-                                    style={styles.scrollView}
-                                >
-                                    {maxGoals.map((item, index) => (
-                                        <View key={index}>
-                                            {renderPlayerItem({ item })}
-                                        </View>
-                                    ))}
+                    <View style={styles.centrar}>
+                        <View style={styles.infoRowGraphic}>
+                            {/* Gráfica de Progreso de Entrenamientos */}
+                            <View style={styles.trainingChartContainer}>
+                                <View style={styles.rowContent3}>
+                                    <Text style={styles.trainingChartText}>Calificación total de entrenamientos</Text>
                                 </View>
-                            ) : (
-                                <ScrollView
-                                    style={styles.scrollView}
-                                    refreshControl={
-                                        <RefreshControl
-                                            refreshing={refreshing}
-                                            onRefresh={onRefresh}
+                                {/*Muestra la gráfica de dona */}
+                                {response && Array.isArray(dataPie) && dataPie.length > 0 ? (
+                                    <View style={styles.rowContent4}>
+                                        <PieChart
+                                            data={dataPie}
+                                            donut
+                                            radius={100}
+                                            innerRadius={50}
+                                            textColor="black"
+                                            textSize={12}
+                                            showGradient
+                                            onPress={(index) => {
+                                                setCenterText(index.text || "Selecciona un segmento");
+                                            }}
+                                            centerLabelComponent={() => {
+                                                return <Text style={{ fontSize: 12 }}>{centerText}</Text>;
+                                            }}
                                         />
-                                    }
-                                >
-                                    <View style={{ height: 200, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                        <Image style={{ height: 80, width: 80, marginBottom: 10 }} source={require('../../assets/find.png')} />
-                                        <Text style={{ backgroundColor: '#e6ecf1', color: '#043998', padding: 20, borderRadius: 15, maxWidth: 300 }}>No se encontraron datos de goleadores</Text>
+                                        {renderLegendComponent()}
+                                        <TouchableOpacity style={styles.viewtrainingButton} onPress={handleGrades}>
+                                            <Text style={styles.viewProfileText}>Ver mas detalles</Text>
+                                        </TouchableOpacity>
                                     </View>
-                                </ScrollView>
-                            )}
-                        </View>
-                    </View>
-                </View>
-
-                <View style={styles.centrar}>
-                    <View style={styles.infoRowGraphic}>
-                        <View style={styles.trainingChartContainer}>
-                            <View style={styles.rowContent3}>
-                                <Text style={styles.trainingChartText}>Máximos asistentes</Text>
-                            </View>
-                            <View style={styles.tableHeader}>
-                                <Text style={styles.tableHeaderText}>Jugador</Text>
-                                <Text style={styles.tableHeaderText}>
-                                    <MaterialCommunityIcons name="shoe-cleat" size={20} color="white" />
-                                </Text>
-                            </View>
-                            {loading ? (
-                                <LoadingComponent />
-                            ) : response2 && Array.isArray(maxAssists) && maxAssists.length > 0 ? (
-                                <View
-                                    style={styles.scrollView}
-                                >
-                                    {maxAssists.map((item, index) => (
-                                        <View key={index}>
-                                            {renderPlayerItem({ item })}
+                                ) : (
+                                    <View
+                                        style={{
+                                            height: 200,
+                                            display: "flex",
+                                            alignItems: "center",
+                                            justifyContent: "center",
+                                        }}
+                                    >
+                                        <View style={{ height: 200, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                            <Image style={{ height: 80, width: 80, marginBottom: 10 }} source={require('../../assets/find.png')} />
+                                            <Text style={{ backgroundColor: '#e6ecf1', color: '#043998', padding: 20, borderRadius: 15, maxWidth: 300 }}>No se encontraron datos para la graficas</Text>
                                         </View>
-                                    ))}
-                                </View>
-                            ) : (
-                                <ScrollView
-                                    style={styles.scrollView}
-                                    refreshControl={
-                                        <RefreshControl
-                                            refreshing={refreshing}
-                                            onRefresh={onRefresh}
-                                        />
-                                    }
-                                >
-                                    <View style={{ height: 200, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                        <Image style={{ height: 80, width: 80, marginBottom: 10 }} source={require('../../assets/find.png')} />
-                                        <Text style={{ backgroundColor: '#e6ecf1', color: '#043998', padding: 20, borderRadius: 15, maxWidth: 300 }}>No se encontraron datos de asistentes</Text>
                                     </View>
-                                </ScrollView>
-                            )}
+                                )}
+                            </View>
                         </View>
                     </View>
-                </View>
-            </LinearGradient>
 
-
-            {/* Modal de goles */}
-            <Modal
-                animationType="slide"
-                transparent={true}
-                visible={modalVisibleGoals}
-                onRequestClose={() => setModalVisibleGoals(false)}
-            >
-                <View style={styles.modalCenter}>
-                    <View style={styles.modalContainer}>
-                        <LinearGradient colors={['#020887', '#13071E']} style={styles.headerModal}>
-                            <View style={styles.modalRow}>
-                                <Image style={styles.modalImage} source={require('../../assets/gol_blanco 2.png')} />
-                                <Text style={styles.modalTitle}>Goles</Text>
-                            </View>
-                        </LinearGradient>
-
-                        <ScrollView>
-                            <View style={styles.modalContent}>
-                                {matchData.map((item, index) => (
-                                    <View style={styles.rowContent} key={index}>
-                                        <GolCard data={item} />
-                                    </View>
-                                ))}
-                            </View>
-                        </ScrollView>
-
-                        <TouchableOpacity
-                            style={styles.closeButton}
-                            onPress={() => setModalVisibleGoals(false)}
-                        >
-                            <Text style={styles.closeButtonText}>Cerrar</Text>
-                        </TouchableOpacity>
+                    {/* Sección de Estadísticas */}
+                    <View style={styles.statsContainer}>
+                        <Surface style={[styles.surface, { backgroundColor: '#020887' }]} elevation={5}>
+                            <TouchableOpacity style={styles.statBox} onPress={() => openModalMatches()}>
+                                <MaterialCommunityIcons name="soccer-field" size={24} color="white" />
+                                <Text style={styles.statValue}>{stats.partidos}</Text>
+                                <Text style={styles.statLabel}>Total partidos</Text>
+                            </TouchableOpacity>
+                        </Surface>
+                        <Surface style={[styles.surface, { backgroundColor: '#5209B0' }]} elevation={5}>
+                            <TouchableOpacity style={styles.statBox} onPress={() => openModalGoals()}>
+                                <MaterialCommunityIcons name="soccer" size={24} color="white" />
+                                <Text style={styles.statValue}>{stats.goles}</Text>
+                                <Text style={styles.statLabel}>Total goles</Text>
+                            </TouchableOpacity>
+                        </Surface>
+                        <Surface style={[styles.surface, { backgroundColor: '#020887' }]} elevation={5}>
+                            <TouchableOpacity style={styles.statBox} onPress={() => openModalAssists()}>
+                                <MaterialCommunityIcons name="shoe-cleat" size={24} color="white" />
+                                <Text style={styles.statValue}>{stats.asistencias}</Text>
+                                <Text style={styles.statLabel}>Total asistencias</Text>
+                            </TouchableOpacity>
+                        </Surface>
                     </View>
-                </View>
-            </Modal>
 
-            {/* Modal de partidos */}
-            <Modal
-                animationType="slide"
-                transparent={true}
-                visible={modalVisibleMatches}
-                onRequestClose={() => setModalVisibleMatches(false)}
-            >
-                <View style={styles.modalCenter}>
-                    <View style={styles.modalContainer}>
-                        <LinearGradient colors={['#020887', '#13071E']} style={styles.headerModal}>
-                            <View style={styles.modalRow}>
-                                <Image style={styles.modalImage} source={require('../../assets/gol_blanco 2.png')} />
-                                <Text style={styles.modalTitle}>Partidos</Text>
-                            </View>
-                        </LinearGradient>
-                        <ScrollView>
-                            <View style={styles.cardsContainer}>
-                                {
-                                    data ? (
-                                        matches.map((item, index) => (
-                                            <MatchesCard
-                                                key={index}
-                                                data={item}
-                                                teamImg={item.logoIzquierda}
-                                                rivalImg={item.logoDerecha}
-                                                goToScreen={goToPerformanceDetails}
+                    {/* Sección de Estadísticas 2*/}
+                    <View style={styles.statsContainer}>
+                        <Surface style={[styles.surface, { backgroundColor: '#5209B0' }]} elevation={5}>
+                            <TouchableOpacity style={styles.statBox} onPress={() => openModalMinutes()}>
+                                <MaterialCommunityIcons name="camera-timer" size={24} color="white" />
+                                <Text style={styles.statValue}>{stats.minutos}</Text>
+                                <Text style={styles.statLabel}>Minutos jugados</Text>
+                            </TouchableOpacity>
+                        </Surface>
+                        <Surface style={[styles.surface, { backgroundColor: '#dac002' }]} elevation={5}>
+                            <TouchableOpacity style={styles.statBox} onPress={() => openModalYellowCards()}>
+                                <MaterialCommunityIcons name="card" size={24} color="white" />
+                                <Text style={styles.statValue}>{stats.amarillas}</Text>
+                                <Text style={styles.statLabel}>Tarjetas amarillas</Text>
+                            </TouchableOpacity>
+                        </Surface>
+                        <Surface style={[styles.surface, { backgroundColor: '#bd1100' }]} elevation={5}>
+                            <TouchableOpacity style={styles.statBox} onPress={() => openModalRedCards()}>
+                                <MaterialCommunityIcons name="card" size={24} color="white" />
+                                <Text style={styles.statValue}>{stats.rojas}</Text>
+                                <Text style={styles.statLabel}>Tarjetas rojas</Text>
+                            </TouchableOpacity>
+                        </Surface>
+                    </View>
+
+
+
+                    {/* Comparación con el resto del equipo */}
+                    <View style={styles.centrar}>
+                        <View style={styles.infoRowGraphic}>
+                            <View style={styles.trainingChartContainer}>
+                                <View style={styles.rowContent3}>
+                                    <Text style={styles.trainingChartText}>Máximos goleadores</Text>
+                                </View>
+                                <View style={styles.tableHeader}>
+                                    <Text style={styles.tableHeaderText}>Jugador</Text>
+                                    <Text style={styles.tableHeaderText}>
+                                        <MaterialCommunityIcons name="soccer" size={20} color="white" />
+                                    </Text>
+                                </View>
+                                {loading ? (
+                                    <LoadingComponent />
+                                ) : response1 && Array.isArray(maxGoals) && maxGoals.length > 0 ? (
+                                    <View
+                                        style={styles.scrollView}
+                                    >
+                                        {maxGoals.map((item, index) => (
+                                            <View key={index}>
+                                                {renderPlayerItem({ item })}
+                                            </View>
+                                        ))}
+                                    </View>
+                                ) : (
+                                    <ScrollView
+                                        style={styles.scrollView}
+                                        refreshControl={
+                                            <RefreshControl
+                                                refreshing={refreshing}
+                                                onRefresh={onRefresh}
                                             />
-                                        ))
-                                    ) : (
-                                        <View>
-                                            <Text>Aún no has tenido partidos</Text>
+                                        }
+                                    >
+                                        <View style={{ height: 200, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                            <Image style={{ height: 80, width: 80, marginBottom: 10 }} source={require('../../assets/find.png')} />
+                                            <Text style={{ backgroundColor: '#e6ecf1', color: '#043998', padding: 20, borderRadius: 15, maxWidth: 300 }}>No se encontraron datos de goleadores</Text>
                                         </View>
-                                    )
-                                }
+                                    </ScrollView>
+                                )}
                             </View>
-                        </ScrollView>
-                        <TouchableOpacity
-                            style={styles.closeButton}
-                            onPress={() => setModalVisibleMatches(false)}
-                        >
-                            <Text style={styles.closeButtonText}>Cerrar</Text>
-                        </TouchableOpacity>
+                        </View>
                     </View>
-                </View>
-            </Modal>
 
-            {/* Modal de asistencias */}
-            <Modal
-                animationType="slide"
-                transparent={true}
-                visible={modalVisibleAssists}
-                onRequestClose={() => setModalVisibleAssists(false)}
-            >
-                <View style={styles.modalCenter}>
-                    <View style={styles.modalContainer}>
-                        <LinearGradient colors={['#020887', '#13071E']} style={styles.headerModal}>
-                            <View style={styles.modalRow}>
-                                <Image style={styles.modalImage} source={require('../../assets/gol_blanco 2.png')} />
-                                <Text style={styles.modalTitle}>Asistencias</Text>
-                            </View>
-                        </LinearGradient>
-
-                        <ScrollView>
-                            <View style={styles.modalContent}>
-                                {assistsData.map((item, index) => (
-                                    <View style={styles.rowContent} key={index}>
-                                        <AssistsCard data={item} />
+                    <View style={styles.centrar}>
+                        <View style={styles.infoRowGraphic}>
+                            <View style={styles.trainingChartContainer}>
+                                <View style={styles.rowContent3}>
+                                    <Text style={styles.trainingChartText}>Máximos asistentes</Text>
+                                </View>
+                                <View style={styles.tableHeader}>
+                                    <Text style={styles.tableHeaderText}>Jugador</Text>
+                                    <Text style={styles.tableHeaderText}>
+                                        <MaterialCommunityIcons name="shoe-cleat" size={20} color="white" />
+                                    </Text>
+                                </View>
+                                {loading ? (
+                                    <LoadingComponent />
+                                ) : response2 && Array.isArray(maxAssists) && maxAssists.length > 0 ? (
+                                    <View
+                                        style={styles.scrollView}
+                                    >
+                                        {maxAssists.map((item, index) => (
+                                            <View key={index}>
+                                                {renderPlayerItem({ item })}
+                                            </View>
+                                        ))}
                                     </View>
-                                ))}
+                                ) : (
+                                    <ScrollView
+                                        style={styles.scrollView}
+                                        refreshControl={
+                                            <RefreshControl
+                                                refreshing={refreshing}
+                                                onRefresh={onRefresh}
+                                            />
+                                        }
+                                    >
+                                        <View style={{ height: 200, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                            <Image style={{ height: 80, width: 80, marginBottom: 10 }} source={require('../../assets/find.png')} />
+                                            <Text style={{ backgroundColor: '#e6ecf1', color: '#043998', padding: 20, borderRadius: 15, maxWidth: 300 }}>No se encontraron datos de asistentes</Text>
+                                        </View>
+                                    </ScrollView>
+                                )}
                             </View>
-                        </ScrollView>
-
-                        <TouchableOpacity
-                            style={styles.closeButton}
-                            onPress={() => setModalVisibleAssists(false)}
-                        >
-                            <Text style={styles.closeButtonText}>Cerrar</Text>
-                        </TouchableOpacity>
+                        </View>
                     </View>
-                </View>
-            </Modal>
+                </LinearGradient>
 
 
-            {/* Modal de minutos jugados */}
-            <Modal
-                animationType="slide"
-                transparent={true}
-                visible={modalVisibleMinutes}
-                onRequestClose={() => setModalVisibleMinutes(false)}
-            >
-                <View style={styles.modalCenter}>
-                    <View style={styles.modalContainer}>
-                        <LinearGradient colors={['#020887', '#13071E']} style={styles.headerModal}>
-                            <View style={styles.modalRow}>
-                                <Image style={styles.modalImage} source={require('../../assets/gol_blanco 2.png')} />
-                                <Text style={styles.modalTitle}>Minutos jugados</Text>
-                            </View>
-                        </LinearGradient>
+                {/* Modal de goles */}
+                <Modal
+                    animationType="slide"
+                    transparent={true}
+                    visible={modalVisibleGoals}
+                    onRequestClose={() => setModalVisibleGoals(false)}
+                >
+                    <View style={styles.modalCenter}>
+                        <View style={styles.modalContainer}>
+                            <LinearGradient colors={['#020887', '#13071E']} style={styles.headerModal}>
+                                <View style={styles.modalRow}>
+                                    <Image style={styles.modalImage} source={require('../../assets/gol_blanco 2.png')} />
+                                    <Text style={styles.modalTitle}>Goles</Text>
+                                </View>
+                            </LinearGradient>
 
-                        <ScrollView>
-                            <View style={styles.modalContent}>
-                                {minutesData.map((item, index) => (
-                                    <View style={styles.rowContent} key={index}>
-                                        <MinutesCard data={item} />
-                                    </View>
-                                ))}
-                            </View>
-                        </ScrollView>
+                            <ScrollView>
+                                <View style={styles.modalContent}>
+                                    {
+                                        data ? (
+                                            matchData.map((item, index) => (
+                                                <View style={styles.rowContent} key={index}>
+                                                    <GolCard data={item} />
+                                                </View>
+                                            ))
+                                        ) : (
+                                            <View style={{ height: 200, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                <Image style={{ height: 80, width: 80, marginBottom: 10 }} source={require('../../assets/find.png')} />
+                                                <Text style={{ backgroundColor: '#e6ecf1', color: '#043998', padding: 20, borderRadius: 15, maxWidth: 300 }}>No haz marcado ningún gol</Text>
+                                            </View>
+                                        )
+                                    }
+                                </View>
+                            </ScrollView>
 
-                        <TouchableOpacity
-                            style={styles.closeButton}
-                            onPress={() => setModalVisibleMinutes(false)}
-                        >
-                            <Text style={styles.closeButtonText}>Cerrar</Text>
-                        </TouchableOpacity>
+                            <TouchableOpacity
+                                style={styles.closeButton}
+                                onPress={() => setModalVisibleGoals(false)}
+                            >
+                                <Text style={styles.closeButtonText}>Cerrar</Text>
+                            </TouchableOpacity>
+                        </View>
                     </View>
-                </View>
-            </Modal>
+                </Modal>
 
-            {/* Modal de tarjetas amarillas */}
-            <Modal
-                animationType="slide"
-                transparent={true}
-                visible={modalVisibleYellowCards}
-                onRequestClose={() => setModalVisibleYellowCards(false)}
-            >
-                <View style={styles.modalCenter}>
-                    <View style={styles.modalContainer}>
-                        <LinearGradient colors={['#020887', '#13071E']} style={styles.headerModal}>
-                            <View style={styles.modalRow}>
-                                <Image style={styles.modalImage} source={require('../../assets/gol_blanco 2.png')} />
-                                <Text style={styles.modalTitle}>Tarjetas amarillas</Text>
-                            </View>
-                        </LinearGradient>
-
-                        <ScrollView>
-                            <View style={styles.modalContent}>
-                                {yellowData.map((item, index) => (
-                                    <View style={styles.rowContent} key={index}>
-                                        <YellowCard data={item} />
-                                    </View>
-                                ))}
-                            </View>
-                        </ScrollView>
-
-                        <TouchableOpacity
-                            style={styles.closeButton}
-                            onPress={() => setModalVisibleYellowCards(false)}
-                        >
-                            <Text style={styles.closeButtonText}>Cerrar</Text>
-                        </TouchableOpacity>
+                {/* Modal de partidos */}
+                <Modal
+                    animationType="slide"
+                    transparent={true}
+                    visible={modalVisibleMatches}
+                    onRequestClose={() => setModalVisibleMatches(false)}
+                >
+                    <View style={styles.modalCenter}>
+                        <View style={styles.modalContainer}>
+                            <LinearGradient colors={['#020887', '#13071E']} style={styles.headerModal}>
+                                <View style={styles.modalRow}>
+                                    <Image style={styles.modalImage} source={require('../../assets/gol_blanco 2.png')} />
+                                    <Text style={styles.modalTitle}>Partidos</Text>
+                                </View>
+                            </LinearGradient>
+                            <ScrollView>
+                                <View style={styles.cardsContainer}>
+                                    {
+                                        data ? (
+                                            matches.map((item, index) => (
+                                                <MatchesCard
+                                                    key={index}
+                                                    data={item}
+                                                    teamImg={item.logoIzquierda}
+                                                    rivalImg={item.logoDerecha}
+                                                    goToScreen={goToPerformanceDetails}
+                                                />
+                                            ))
+                                        ) : (
+                                            <View style={{ height: 200, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                <Image style={{ height: 80, width: 80, marginBottom: 10 }} source={require('../../assets/find.png')} />
+                                                <Text style={{ backgroundColor: '#e6ecf1', color: '#043998', padding: 20, borderRadius: 15, maxWidth: 300 }}>No tienes partidos jugados</Text>
+                                            </View>
+                                        )
+                                    }
+                                </View>
+                            </ScrollView>
+                            <TouchableOpacity
+                                style={styles.closeButton}
+                                onPress={() => setModalVisibleMatches(false)}
+                            >
+                                <Text style={styles.closeButtonText}>Cerrar</Text>
+                            </TouchableOpacity>
+                        </View>
                     </View>
-                </View>
-            </Modal>
+                </Modal>
 
-            {/* Modal de tarjetas rojas */}
-            <Modal
-                animationType="slide"
-                transparent={true}
-                visible={modalVisibleRedCards}
-                onRequestClose={() => setModalVisibleRedCards(false)}
-            >
-                <View style={styles.modalCenter}>
-                    <View style={styles.modalContainer}>
-                        <LinearGradient colors={['#020887', '#13071E']} style={styles.headerModal}>
-                            <View style={styles.modalRow}>
-                                <Image style={styles.modalImage} source={require('../../assets/gol_blanco 2.png')} />
-                                <Text style={styles.modalTitle}>Tarjetas rojas</Text>
-                            </View>
-                        </LinearGradient>
+                {/* Modal de asistencias */}
+                <Modal
+                    animationType="slide"
+                    transparent={true}
+                    visible={modalVisibleAssists}
+                    onRequestClose={() => setModalVisibleAssists(false)}
+                >
+                    <View style={styles.modalCenter}>
+                        <View style={styles.modalContainer}>
+                            <LinearGradient colors={['#020887', '#13071E']} style={styles.headerModal}>
+                                <View style={styles.modalRow}>
+                                    <Image style={styles.modalImage} source={require('../../assets/gol_blanco 2.png')} />
+                                    <Text style={styles.modalTitle}>Asistencias</Text>
+                                </View>
+                            </LinearGradient>
 
-                        <ScrollView>
-                            <View style={styles.modalContent}>
-                                {redData.map((item, index) => (
-                                    <View style={styles.rowContent} key={index}>
-                                        <RedCard data={item} />
-                                    </View>
-                                ))}
-                            </View>
-                        </ScrollView>
+                            <ScrollView>
+                                <View style={styles.modalContent}>
+                                    {
+                                        data ? (
+                                            assistsData.map((item, index) => (
+                                                <View style={styles.rowContent} key={index}>
+                                                    <AssistsCard data={item} />
+                                                </View>
+                                            ))
+                                        ) : (
+                                            <View style={{ height: 200, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                <Image style={{ height: 80, width: 80, marginBottom: 10 }} source={require('../../assets/find.png')} />
+                                                <Text style={{ backgroundColor: '#e6ecf1', color: '#043998', padding: 20, borderRadius: 15, maxWidth: 300 }}>No tienes asistencias hechas</Text>
+                                            </View>
+                                        )
+                                    }
+                                </View>
+                            </ScrollView>
 
-                        <TouchableOpacity
-                            style={styles.closeButton}
-                            onPress={() => setModalVisibleRedCards(false)}
-                        >
-                            <Text style={styles.closeButtonText}>Cerrar</Text>
-                        </TouchableOpacity>
+                            <TouchableOpacity
+                                style={styles.closeButton}
+                                onPress={() => setModalVisibleAssists(false)}
+                            >
+                                <Text style={styles.closeButtonText}>Cerrar</Text>
+                            </TouchableOpacity>
+                        </View>
                     </View>
-                </View>
-            </Modal>
-        </ScrollView>
+                </Modal>
+
+
+                {/* Modal de minutos jugados */}
+                <Modal
+                    animationType="slide"
+                    transparent={true}
+                    visible={modalVisibleMinutes}
+                    onRequestClose={() => setModalVisibleMinutes(false)}
+                >
+                    <View style={styles.modalCenter}>
+                        <View style={styles.modalContainer}>
+                            <LinearGradient colors={['#020887', '#13071E']} style={styles.headerModal}>
+                                <View style={styles.modalRow}>
+                                    <Image style={styles.modalImage} source={require('../../assets/gol_blanco 2.png')} />
+                                    <Text style={styles.modalTitle}>Minutos jugados</Text>
+                                </View>
+                            </LinearGradient>
+
+                            <ScrollView>
+                                <View style={styles.modalContent}>
+                                    {
+                                        data ? (
+                                            minutesData.map((item, index) => (
+                                                <View style={styles.rowContent} key={index}>
+                                                    <MinutesCard data={item} />
+                                                </View>
+                                            ))
+                                        ) : (
+                                            <View style={{ height: 200, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                <Image style={{ height: 80, width: 80, marginBottom: 10 }} source={require('../../assets/find.png')} />
+                                                <Text style={{ backgroundColor: '#e6ecf1', color: '#043998', padding: 20, borderRadius: 15, maxWidth: 300 }}>No tienes minutos jugados</Text>
+                                            </View>
+                                        )
+                                    }
+                                </View>
+                            </ScrollView>
+
+                            <TouchableOpacity
+                                style={styles.closeButton}
+                                onPress={() => setModalVisibleMinutes(false)}
+                            >
+                                <Text style={styles.closeButtonText}>Cerrar</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </Modal>
+
+                {/* Modal de tarjetas amarillas */}
+                <Modal
+                    animationType="slide"
+                    transparent={true}
+                    visible={modalVisibleYellowCards}
+                    onRequestClose={() => setModalVisibleYellowCards(false)}
+                >
+                    <View style={styles.modalCenter}>
+                        <View style={styles.modalContainer}>
+                            <LinearGradient colors={['#020887', '#13071E']} style={styles.headerModal}>
+                                <View style={styles.modalRow}>
+                                    <Image style={styles.modalImage} source={require('../../assets/gol_blanco 2.png')} />
+                                    <Text style={styles.modalTitle}>Tarjetas amarillas</Text>
+                                </View>
+                            </LinearGradient>
+
+                            <ScrollView>
+                                <View style={styles.modalContent}>
+                                    {
+                                        data ? (
+                                            yellowData.map((item, index) => (
+                                                <View style={styles.rowContent} key={index}>
+                                                    <YellowCard data={item} />
+                                                </View>
+                                            ))
+                                        ) : (
+                                            <View style={{ height: 200, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                <Image style={{ height: 80, width: 80, marginBottom: 10 }} source={require('../../assets/find.png')} />
+                                                <Text style={{ backgroundColor: '#e6ecf1', color: '#043998', padding: 20, borderRadius: 15, maxWidth: 300 }}>No tienes tarjetas amarillas</Text>
+                                            </View>
+                                        )
+                                    }
+                                </View>
+                            </ScrollView>
+
+                            <TouchableOpacity
+                                style={styles.closeButton}
+                                onPress={() => setModalVisibleYellowCards(false)}
+                            >
+                                <Text style={styles.closeButtonText}>Cerrar</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </Modal>
+
+                {/* Modal de tarjetas rojas */}
+                <Modal
+                    animationType="slide"
+                    transparent={true}
+                    visible={modalVisibleRedCards}
+                    onRequestClose={() => setModalVisibleRedCards(false)}
+                >
+                    <View style={styles.modalCenter}>
+                        <View style={styles.modalContainer}>
+                            <LinearGradient colors={['#020887', '#13071E']} style={styles.headerModal}>
+                                <View style={styles.modalRow}>
+                                    <Image style={styles.modalImage} source={require('../../assets/gol_blanco 2.png')} />
+                                    <Text style={styles.modalTitle}>Tarjetas rojas</Text>
+                                </View>
+                            </LinearGradient>
+
+                            <ScrollView>
+                                <View style={styles.modalContent}>
+                                    {
+                                        data ? (
+                                            redData.map((item, index) => (
+                                                <View style={styles.rowContent} key={index}>
+                                                    <RedCard data={item} />
+                                                </View>
+                                            ))
+                                        ) : (
+                                            <View style={{ height: 200, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                <Image style={{ height: 80, width: 80, marginBottom: 10 }} source={require('../../assets/find.png')} />
+                                                <Text style={{ backgroundColor: '#e6ecf1', color: '#043998', padding: 20, borderRadius: 15, maxWidth: 300 }}>No tienes tarjetas rojas</Text>
+                                            </View>
+                                        )
+                                    }
+                                </View>
+                            </ScrollView>
+
+                            <TouchableOpacity
+                                style={styles.closeButton}
+                                onPress={() => setModalVisibleRedCards(false)}
+                            >
+                                <Text style={styles.closeButtonText}>Cerrar</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </Modal>
+            </ScrollView>
+        </AlertNotificationRoot>
     )
 }
 

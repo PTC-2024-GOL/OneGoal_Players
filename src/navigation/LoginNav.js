@@ -9,6 +9,7 @@ import GradesScreen from "../screens/GradesScreen";
 import PerformanceDetails from "../screens/PerformanceDetails";
 import ProfileScreen from "../screens/ProfileScreen";
 import TestPlayerScreen from "../screens/TestPlayerScreen";
+import SearchScreen from "../screens/SearchScreen";
 /* import RecoverPasswordScreen from '../screens/ChangePasswordsScreen';
 import PlayersScreen from '../screens/PlayersScreen';
 import PlayersDetails from "../screens/PlayersDetails";
@@ -74,6 +75,12 @@ export default function LoginNav({ logueado, setLogueado }) {
          options={{ headerShown: false }}
       >
          {props => <PerformanceDetails {...props} setLogueado={setLogueado} logueado={logueado} />}
+      </Stack.Screen>
+      <Stack.Screen
+         name='SearchScreen'
+         options={{ headerShown: false }}
+      >
+         {props => <SearchScreen {...props} setLogueado={setLogueado} logueado={logueado} />}
       </Stack.Screen>
       <Stack.Screen
          name='Notas'

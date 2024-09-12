@@ -184,7 +184,7 @@ const styles = StyleSheet.create({
         marginVertical: 10,
         backgroundColor: 'white',
         borderWidth: 1,
-        borderColor: '#EBF0FF',
+        borderColor: 'gray',
         color: 'gray',
         maxHeight: windowHeight * 0.07,
         maxWidth: windowWidth * 0.9,

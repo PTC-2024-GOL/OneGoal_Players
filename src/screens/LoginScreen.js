@@ -37,23 +37,30 @@ const LoginScreen = ({ logueado, setLogueado }) => {
 
   // Manejo de inicio de sesión
   const handleLogin = async () => {
-    // Creación del formulario para la petición
-    const formData = new FormData();
-    formData.append('correo', alias);
-    formData.append('clave', clave);
-
-    try {
-      // Realización de la petición de inicio de sesión
-      const data = await fetchData(USER_API, 'logIn', formData);
-      if (data.status) {
-        DialogNotification(1, data.message, 'Aceptar', goToHome)
-      } else {
-        console.log(data);
-        ToastNotification(2, data.error, true);
+    
+    // Verifica que los campos no estén vacíos
+    if (!alias || !clave) {
+      ToastNotification(2, `Campos requeridos, Por favor, complete todos los campos.`, true);
+      return;
+    } else {
+      // Creación del formulario para la petición
+      const formData = new FormData();
+      formData.append('correo', alias);
+      formData.append('clave', clave);
+  
+      try {
+        // Realización de la petición de inicio de sesión
+        const data = await fetchData(USER_API, 'logIn', formData);
+        if (data.status) {
+          DialogNotification(1, data.message, 'Aceptar', goToHome)
+        } else {
+          console.log(data);
+          ToastNotification(2, data.error, true);
+        }
+      } catch (error) {
+        console.log('Error: ', error);
+          ToastNotification(3, 'No se encontró ningún usuario', true);
       }
-    } catch (error) {
-      console.log('Error: ', error);
-        ToastNotification(3, 'No se encontró ningún usuario', true);
     }
   };
 

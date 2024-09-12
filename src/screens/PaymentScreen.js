@@ -146,7 +146,7 @@ const PaymentScreen = () => {
               <Ionicons
                 name="time-outline"
                 size={24}
-                color={payment.isLate ? "#F44262" : "#4CAF50"}
+                color={payment.isLate == "1" ? "#F44262" : "#4CAF50"}
               />
             </View>
             <Text style={[styles.paymentText, styles.feeColumn]}>
