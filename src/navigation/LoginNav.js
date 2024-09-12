@@ -77,8 +77,8 @@ export default function LoginNav({ logueado, setLogueado }) {
          {props => <PerformanceDetails {...props} setLogueado={setLogueado} logueado={logueado} />}
       </Stack.Screen>
       <Stack.Screen
-         name='SearchScreen'
-         options={{ headerShown: false }}
+         name='Buscar'
+         options={{ headerShown: true }}
       >
          {props => <SearchScreen {...props} setLogueado={setLogueado} logueado={logueado} />}
       </Stack.Screen>

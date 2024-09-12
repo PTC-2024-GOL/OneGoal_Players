@@ -49,7 +49,13 @@ const HomeScreen = ({ logueado, setLogueado }) => {
     const onSearch = () => {
         if (searchQuery != "") {
             // Navegar a la pantalla SearchScreen y pasar el query como parámetro
-            navigation.navigate('SearchScreen', { searchQuery });
+
+            navigation.navigate('LoginNav', {
+                screen: 'Buscar',
+                params: {
+                    search: searchQuery, 
+                }
+            });
         } else {
             ToastNotification(2, "No puedes dejar el campo de busqueda vacio", true);
         }
