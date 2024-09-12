@@ -1,26 +1,46 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Image, Dimensions, Modal } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { LinearGradient } from 'expo-linear-gradient';
-import fetchData from '../../api/components';
+import React, { useState, useEffect, useCallback } from "react";
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
+  TextInput,
+  Image,
+  Dimensions,
+  Modal,
+} from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
+import fetchData from "../../api/components";
 import { useFocusEffect } from "@react-navigation/native";
-import { Searchbar } from 'react-native-paper';
+import { Searchbar } from "react-native-paper";
+import LoadingComponent from "../components/LoadingComponent";
 
-const windowWidth = Dimensions.get('window').width;
-const windowHeight = Dimensions.get('window').height;
+const windowWidth = Dimensions.get("window").width;
+const windowHeight = Dimensions.get("window").height;
 
 const MedicalHistory = () => {
   // URL de la API para el usuario
-  const API = 'services/players/registro_medico.php';
+  const API = "services/players/registro_medico.php";
 
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedInjury, setSelectedInjury] = useState(null);
   const [returnModalVisible, setReturnModalVisible] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
+  const [response, setResponse] = useState(false); // Estado para controlar si hay datos
+  const [loading, setLoading] = useState(true); // Estado para controlar la carga inicial
   //Constantes para la busqueda con el elemento de la libreria searchBar
-  const onChangeSearch = query => setSearchQuery(query);
+  const onChangeSearch = (query) => setSearchQuery(query);
   const [injuries, setInjuries] = useState([
-    { part: ' ', days: ' ', injuryDate: ' ', returnDate: ' ', returnTraining:' ', returnMatch:' '  },
+    {
+      part: " ",
+      days: " ",
+      injuryDate: " ",
+      returnDate: " ",
+      returnTraining: " ",
+      returnMatch: " ",
+    },
   ]);
   const [data, setData] = useState(false);
 
@@ -28,35 +48,37 @@ const MedicalHistory = () => {
     try {
       const action = searchForm ? "searchRows" : "readAllMobile";
       const data = await fetchData(API, action, searchForm);
-        if (data.status) {
-            const info = data.dataset.map(item => {
-                const part = item.nombre_sub_tipologia;
-                const days = item.dias_lesionado;
-                const injuryDate = item.fecha_lesion;
-                const returnDate = item.fecha_registro;
-                const returnTraining=item.retorno_entreno;
-                const returnMatch=item.fecha_partido;
+      if (data.status) {
+        const info = data.dataset.map((item) => {
+          const part = item.nombre_sub_tipologia;
+          const days = item.dias_lesionado;
+          const injuryDate = item.fecha_lesion;
+          const returnDate = item.fecha_registro;
+          const returnTraining = item.retorno_entreno;
+          const returnMatch = item.fecha_partido;
 
-                return {
-                    part,
-                    days,
-                    injuryDate,
-                    returnDate,
-                    returnTraining,
-                    returnMatch,
-                };
-            });
+          return {
+            part,
+            days,
+            injuryDate,
+            returnDate,
+            returnTraining,
+            returnMatch,
+          };
+        });
 
-            setInjuries(info); 
-            setData(true);
-        } else {
-            console.log(data.error);
-            setData(false);
-        }
+        setInjuries(info);
+        setData(true);
+      } else {
+        console.log(data.error);
+        setData(false);
+      }
     } catch (e) {
-        console.log(e);
-    }
-};    
+      console.log(e);
+    }finally {
+      setLoading(false);
+  }
+  };
 
   const openModal = (injury) => {
     setSelectedInjury(injury);
@@ -70,29 +92,29 @@ const MedicalHistory = () => {
 
   useEffect(() => {
     const initializeApp = async () => {
-        await fillRegistroMedico();
+      await fillRegistroMedico();
     };
     initializeApp();
-}, []);
+  }, []);
 
-useEffect(() => {
-  if (searchQuery != "") {
-    const formData = new FormData();
-    formData.append("search", searchQuery);
-    fillRegistroMedico(formData);
-  } else {
-    fillRegistroMedico();
-  }
-}, [searchQuery]);
+  useEffect(() => {
+    if (searchQuery != "") {
+      const formData = new FormData();
+      formData.append("search", searchQuery);
+      fillRegistroMedico(formData);
+    } else {
+      fillRegistroMedico();
+    }
+  }, [searchQuery]);
 
-useFocusEffect(
+  useFocusEffect(
     useCallback(() => {
-        const initializeApp = async () => {
-            await fillRegistroMedico();
-        };
-        initializeApp();
+      const initializeApp = async () => {
+        await fillRegistroMedico();
+      };
+      initializeApp();
     }, [])
-);
+  );
 
   return (
     <View style={styles.container}>
@@ -100,11 +122,12 @@ useFocusEffect(
       <View style={styles.infoRow}>
         <Ionicons name="football" size={24} color="black" />
         <Text style={styles.infoText}>
-          Selecciona un registro o un retorno y observa tus fechas de la lesión y retorno a los partidos
+          Selecciona un registro o un retorno y observa tus fechas de la lesión
+          y retorno a los partidos
         </Text>
       </View>
       <Searchbar
-        placeholder="Buscar pagos"
+        placeholder="Buscar por lesión o fecha de la lesión"
         placeholderTextColor="gray"
         onChangeText={onChangeSearch}
         value={searchQuery}
@@ -115,22 +138,69 @@ useFocusEffect(
         <Text style={styles.tableHeaderText}>Días lesionado</Text>
         <Text style={styles.tableHeaderText}>Fechas</Text>
       </View>
-      <ScrollView style={styles.scrollView}>
-        {injuries.map((injury, index) => (
-          <View key={index} style={styles.injuryRow}>
-            <Text style={styles.injuryText}>{injury.part}</Text>
-            <Text style={styles.injuryText}>{injury.days}</Text>
-            <View style={styles.iconContainer}>
-              <TouchableOpacity style={[styles.iconButton, styles.redButton]} onPress={() => openModal(injury)}>
-                <Image source={require('../../assets/lesion.png')} style={styles.icon} />
-              </TouchableOpacity>
-              <TouchableOpacity style={[styles.iconButton, styles.greenButton]} onPress={() => openReturnModal(injury)}>
-                <Image source={require('../../assets/pelota.png')} style={styles.icon} />
-              </TouchableOpacity>
-            </View>
+      {loading ? (
+        <LoadingComponent />
+      ) : response ? (
+        <View style={styles.scrollContainer}>
+          <ScrollView style={styles.scrollView}>
+            {injuries.map((injury, index) => (
+              <View key={index} style={styles.injuryRow}>
+                <Text style={styles.injuryText}>{injury.part}</Text>
+                <Text style={styles.injuryText}>{injury.days}</Text>
+                <View style={styles.iconContainer}>
+                  <TouchableOpacity
+                    style={[styles.iconButton, styles.redButton]}
+                    onPress={() => openModal(injury)}
+                  >
+                    <Image
+                      source={require("../../assets/lesion.png")}
+                      style={styles.icon}
+                    />
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={[styles.iconButton, styles.greenButton]}
+                    onPress={() => openReturnModal(injury)}
+                  >
+                    <Image
+                      source={require("../../assets/pelota.png")}
+                      style={styles.icon}
+                    />
+                  </TouchableOpacity>
+                </View>
+              </View>
+            ))}
+          </ScrollView>
+        </View>
+      ) : (
+        <ScrollView
+          style={styles.scrollContainer}
+        >
+          <View
+            style={{
+              height: 200,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <Image
+              style={{ height: 80, width: 80, marginBottom: 10 }}
+              source={require("../../assets/find.png")}
+            />
+            <Text
+              style={{
+                backgroundColor: "#e6ecf1",
+                color: "#043998",
+                padding: 20,
+                borderRadius: 15,
+                maxWidth: 300,
+              }}
+            >
+              No se encontraron registros médicos
+            </Text>
           </View>
-        ))}
-      </ScrollView>
+        </ScrollView>
+      )}
 
       {/* Modal de Registro */}
       <Modal
@@ -141,9 +211,15 @@ useFocusEffect(
       >
         <View style={styles.modalCenter}>
           <View style={styles.modalContainer}>
-            <LinearGradient colors={['#020887', '#13071E']} style={styles.headerModal}>
+            <LinearGradient
+              colors={["#020887", "#13071E"]}
+              style={styles.headerModal}
+            >
               <View style={styles.modalRow}>
-                <Image style={styles.modalImage} source={require('../../assets/gol_blanco 2.png')} />
+                <Image
+                  style={styles.modalImage}
+                  source={require("../../assets/gol_blanco 2.png")}
+                />
                 <Text style={styles.modalTitle}>Registro</Text>
               </View>
             </LinearGradient>
@@ -151,11 +227,15 @@ useFocusEffect(
             <ScrollView>
               <View style={styles.modalContent}>
                 <View style={styles.dateCard}>
-                  <Text style={styles.dateText}>{selectedInjury?.injuryDate}</Text>
+                  <Text style={styles.dateText}>
+                    {selectedInjury?.injuryDate}
+                  </Text>
                   <Text style={styles.dateLabel}>Fecha de la lesión</Text>
                 </View>
                 <View style={styles.dateCard}>
-                  <Text style={styles.dateText}>{selectedInjury?.returnDate}</Text>
+                  <Text style={styles.dateText}>
+                    {selectedInjury?.returnDate}
+                  </Text>
                   <Text style={styles.dateLabel}>Fecha de regreso</Text>
                 </View>
               </View>
@@ -180,9 +260,15 @@ useFocusEffect(
       >
         <View style={styles.modalCenter}>
           <View style={styles.modalContainer}>
-            <LinearGradient colors={['#020887', '#13071E']} style={styles.headerModal}>
+            <LinearGradient
+              colors={["#020887", "#13071E"]}
+              style={styles.headerModal}
+            >
               <View style={styles.modalRow}>
-                <Image style={styles.modalImage} source={require('../../assets/gol_blanco 2.png')} />
+                <Image
+                  style={styles.modalImage}
+                  source={require("../../assets/gol_blanco 2.png")}
+                />
                 <Text style={styles.modalTitle}>Retorno</Text>
               </View>
             </LinearGradient>
@@ -190,11 +276,15 @@ useFocusEffect(
             <ScrollView>
               <View style={styles.modalContent}>
                 <View style={styles.dateCard}>
-                  <Text style={styles.dateText}>{selectedInjury?.returnTraining}</Text>
+                  <Text style={styles.dateText}>
+                    {selectedInjury?.returnTraining}
+                  </Text>
                   <Text style={styles.dateLabel}>Retorno a entreno</Text>
                 </View>
                 <View style={styles.dateCard}>
-                  <Text style={styles.dateText}>{selectedInjury?.returnMatch}</Text>
+                  <Text style={styles.dateText}>
+                    {selectedInjury?.returnMatch}
+                  </Text>
                   <Text style={styles.dateLabel}>Retorno a partido</Text>
                 </View>
               </View>
@@ -216,18 +306,18 @@ useFocusEffect(
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
     padding: 20,
-    marginBottom:windowHeight * 0.13,
+    marginBottom: windowHeight * 0.13,
   },
   headerText: {
     fontSize: 24,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginBottom: 10,
   },
   infoRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     marginBottom: 20,
   },
   infoText: {
@@ -236,9 +326,9 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   searchContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#f0f0f0',
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#f0f0f0",
     borderRadius: 25,
     paddingHorizontal: 15,
     marginBottom: 20,
@@ -252,70 +342,70 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   tableHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    backgroundColor: '#334195',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    backgroundColor: "#334195",
     borderRadius: 8,
     padding: 10,
     marginBottom: 10,
   },
   tableHeaderText: {
-    color: 'white',
+    color: "white",
     fontSize: 14,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     flex: 1,
-    textAlign: 'center',
+    textAlign: "center",
   },
   scrollView: {
     flex: 1,
   },
   injuryRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
+    borderBottomColor: "#e0e0e0",
     paddingVertical: 15,
   },
   injuryText: {
     fontSize: 14,
     flex: 1,
-    textAlign: 'center',
+    textAlign: "center",
   },
   iconContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
+    flexDirection: "row",
+    justifyContent: "space-around",
     flex: 1,
   },
   iconButton: {
     borderRadius: 20,
     width: 30,
     height: 30,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   redButton: {
-    backgroundColor: '#ff4d4d',
+    backgroundColor: "#ff4d4d",
   },
   greenButton: {
-    backgroundColor: '#4cd964',
+    backgroundColor: "#4cd964",
   },
   icon: {
     width: 20,
     height: 20,
-    resizeMode: 'contain',
+    resizeMode: "contain",
   },
   modalCenter: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
   },
   modalContainer: {
     width: windowWidth * 0.8,
-    backgroundColor: 'white',
+    backgroundColor: "white",
     borderRadius: 20,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: {
       width: 0,
       height: 2,
@@ -330,9 +420,9 @@ const styles = StyleSheet.create({
     padding: 15,
   },
   modalRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
   },
   modalImage: {
     width: 40,
@@ -340,21 +430,21 @@ const styles = StyleSheet.create({
     marginRight: 10,
   },
   modalTitle: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 24,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   modalContent: {
     padding: 20,
   },
   dateCard: {
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
     padding: 16,
     marginVertical: 8,
     borderRadius: 8,
-    borderStartColor: '#020887',
+    borderStartColor: "#020887",
     borderStartWidth: 5,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 4,
@@ -362,34 +452,38 @@ const styles = StyleSheet.create({
   },
   dateText: {
     fontSize: 16,
-    fontWeight: 'bold',
-    color: '#000',
+    fontWeight: "bold",
+    color: "#000",
   },
   dateLabel: {
     fontSize: 14,
-    color: '#333',
+    color: "#333",
   },
   closeButton: {
-    backgroundColor: '#F44262',
+    backgroundColor: "#F44262",
     padding: 10,
     borderBottomLeftRadius: 20,
     borderBottomRightRadius: 20,
-    alignItems: 'center',
+    alignItems: "center",
   },
   closeButtonText: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   searchbar: {
     flex: 1,
     marginVertical: 10,
-    backgroundColor: 'white',
+    backgroundColor: "white",
     borderWidth: 1,
-    borderColor: 'gray',
-    color: 'gray',
+    borderColor: "gray",
+    color: "gray",
     maxHeight: windowHeight * 0.065,
     maxWidth: windowWidth * 0.9,
+  },
+  scrollContainer: {
+    flex: 1,
+    paddingBottom: 15,
 },
 });
 

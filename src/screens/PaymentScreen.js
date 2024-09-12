@@ -109,7 +109,7 @@ const PaymentScreen = () => {
         </Text>
       </View>
       <Searchbar
-        placeholder="Buscar pagos"
+        placeholder="Buscar por la fecha o mes del pago"
         placeholderTextColor="gray"
         onChangeText={onChangeSearch}
         value={searchQuery}
