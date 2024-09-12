@@ -1,26 +1,81 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, StyleSheet, ScrollView, TextInput, Image, Dimensions, TouchableOpacity, Modal } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
+import fetchData from '../../api/components';
+import { useFocusEffect } from "@react-navigation/native";
  
 const windowWidth = Dimensions.get('window').width;
+const windowHeight = Dimensions.get('window').height;
  
 const PaymentScreen = () => {
+  // URL de la API para el usuario
+  const API = 'services/players/pagos.php';
+
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedPayment, setSelectedPayment] = useState(null);
+  const [data, setData] = useState(false);
  
-  const payments = [
-    { month: 'Enero', amount: 20.25, isPaid: true, date: '20 de enero de 2024', isLate: false },
-    { month: 'Febrero', amount: 20.25, isPaid: true, date: '20 de febrero de 2024', isLate: true },
-    { month: 'Marzo', amount: 20.25, isPaid: true, date: '20 de marzo de 2024', isLate: false },
-    { month: 'Abril', amount: 20.25, isPaid: true, date: '20 de abril de 2024', isLate: true },
-    { month: 'Mayo', amount: 20.25, isPaid: true, date: '20 de mayo de 2024', isLate: false },
-  ];
- 
+  const [payments, setPaymets] = useState([
+    { month: ' ', amount: ' ', mora: ' ', date: ' ', isLate: ' ', total:' ' },
+    { month: ' ', amount: ' ', mora: ' ', date: ' ', isLate: ' ', total:' ' },
+  ]);
+
+ const fillPagos= async () => {
+    try {
+        const data = await fetchData(API, 'readAllMobile');
+        if (data.status) {
+            const info = data.dataset.map(item => {
+                const month = item.MES;
+                const amount = item.CANTIDAD;
+                const mora = item.MORA;
+                const date = item.FECHA;
+                const isLate=item.TARDIO;
+                const total=item.TOTAL;
+
+                return {
+                    month,
+                    amount,
+                    mora,
+                    date,
+                    isLate,
+                    total,
+                };
+            });
+
+            setPaymets(info); 
+            setData(true);
+        } else {
+            console.log(data.error);
+            setData(false);
+        }
+    } catch (e) {
+        console.log(e);
+    }
+};    
+
   const openModal = (payment) => {
     setSelectedPayment(payment);
     setModalVisible(true);
   };
+
+  useEffect(() => {
+    const initializeApp = async () => {
+        await fillPagos();
+    };
+    initializeApp();
+}, []);
+
+useFocusEffect(
+    useCallback(() => {
+        const initializeApp = async () => {
+            await fillPagos();
+        };
+        initializeApp();
+    }, [])
+);
+
+
  
   return (
     <View style={styles.container}>
@@ -49,7 +104,7 @@ const PaymentScreen = () => {
       <ScrollView style={styles.scrollView}>
         {payments.map((payment, index) => (
           <View key={index} style={styles.paymentRow}>
-            <Text style={[styles.paymentText, styles.amountColumn]}>${payment.amount.toFixed(2)}</Text>
+            <Text style={[styles.paymentText, styles.amountColumn]}>${payment.amount}</Text>
             <View style={[styles.lateColumn, styles.iconContainer]}>
               <Ionicons
                 name="time-outline"
@@ -57,8 +112,8 @@ const PaymentScreen = () => {
                 color={payment.isLate ? '#F44262' : '#4CAF50'}
               />
             </View>
-            <Text style={[styles.paymentText, styles.feeColumn]}>$0.25</Text>
-            <Text style={[styles.paymentText, styles.totalColumn]}>${(payment.amount + 0.25).toFixed(2)}</Text>
+            <Text style={[styles.paymentText, styles.feeColumn]}>${payment.mora}</Text>
+            <Text style={[styles.paymentText, styles.totalColumn]}>${payment.total}</Text>
             <View style={[styles.dateColumn, styles.iconContainer]}>
               <TouchableOpacity
                 style={[styles.iconButton, styles.blueButton]}

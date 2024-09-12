@@ -16,13 +16,8 @@ const MedicalHistory = () => {
   const [selectedInjury, setSelectedInjury] = useState(null);
   const [returnModalVisible, setReturnModalVisible] = useState(false);
   const [injuries, setInjuries] = useState([
-    { part: 'Tren superior', days: 4, injuryDate: '8 de noviembre 2023', returnDate: '12 de noviembre 2023', returnTraining:' ', returnMatch:' '  },
-    { part: 'Tren inferior', days: 10, injuryDate: '10 de noviembre 2022', returnDate: '20 de noviembre 2022',returnTraining:' ', returnMatch:' ' },
-    { part: 'Tren superior', days: 25, injuryDate: '1 de diciembre 2023', returnDate: '26 de diciembre 2023',returnTraining:' ', returnMatch:' ' },
-    { part: 'Tren inferior', days: 3, injuryDate: '5 de enero 2024', returnDate: '8 de enero 2024',returnTraining:' ', returnMatch:' ' },
-    { part: 'Tren superior', days: 8, injuryDate: '15 de febrero 2024', returnDate: '23 de febrero 2024',returnTraining:' ', returnMatch:' ' },
+    { part: ' ', days: ' ', injuryDate: ' ', returnDate: ' ', returnTraining:' ', returnMatch:' '  },
   ]);
-  const [registroMedico, setRegistroMedico] = useState([]);
   const [data, setData] = useState(false);
 
   const fillRegistroMedico = async () => {
