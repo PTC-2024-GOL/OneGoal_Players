@@ -6,22 +6,17 @@ import { useNavigation } from '@react-navigation/native'; // Importa useNavigati
 import Entypo from "@expo/vector-icons/Entypo";
 import { useFocusEffect, useRoute } from "@react-navigation/native"; // Importa useRoute
 import InfoPlayers from "../components/playersComponent/InfoPlayer";
-import TrainingPlayer from "../components/playersComponent/TrainingPlayer";
-//import AssistancePlayer from "../components/playersComponent/AssistancePlayer";
 import fetchData from "../../api/components";
-import AlertComponent from '../components/AlertComponent';
 
 import { SERVER_URL } from "../../api/constantes";
+import {DialogNotification, ToastNotification} from "../components/Alerts/AlertComponent";
+import {AlertNotificationRoot} from "react-native-alert-notification";
 
 const ProfileScreen = ({ logueado, setLogueado }) => {
     // Manejo del cambio de pantallas.
     const [activeSection, setActiveSection] = useState('informacion');
     // Manejo para el estilo de los botones.
     const [activeChip, setActiveChip] = useState('informacion');
-    const [alertVisible, setAlertVisible] = useState(false);
-    const [alertType, setAlertType] = useState(1);
-    const [alertMessage, setAlertMessage] = useState('');
-    const [alertCallback, setAlertCallback] = useState(null);
     const [players, setPlayers] = useState([]);
     const API_PLAYERS = 'services/players/jugadores.php';
     const API_ESTADO_FISICO = 'services/players/estado_fisico_jugador.php';
@@ -62,29 +57,15 @@ const ProfileScreen = ({ logueado, setLogueado }) => {
         try {
             const data = await fetchData(API_PLAYERS, "logOut");
             if (data.status) {
-                setAlertType(1);
-                setAlertMessage(`${data.message}`);
-                setAlertCallback(() => logout);
-                setAlertVisible(true);
+                DialogNotification(1, data.message, 'Aceptar', logout);
             } else {
-                setAlertType(2);
-                setAlertMessage(`Error sesión: ${data.error}`);
-                setAlertCallback(null);
-                setAlertVisible(true);
+                ToastNotification(2, `Error sesión: ${data.error}`, true)
             }
         } catch (error) {
-            setAlertType(2);
-            setAlertMessage(`Error sesión: ${data.error}`);
-            setAlertCallback(null);
-            setAlertVisible(true);
+            ToastNotification(2, `Error sesión: ${error}`, true);
         }
     };
 
-
-    const handleAlertClose = () => {
-        setAlertVisible(false);
-        if (alertCallback) alertCallback();
-    };
 
     //Peticion a la api para traerme informacion sobre el jugador
     const fillPlayers = async () => {
@@ -117,36 +98,32 @@ const ProfileScreen = ({ logueado, setLogueado }) => {
     }
 
     return (
-        <View style={styles.container}>
-            {/*HEADER*/}
+        <AlertNotificationRoot>
+            <View style={styles.container}>
+                {/*HEADER*/}
 
-            <LinearGradient style={styles.linearGradient} colors={['#03045E', '#0608C4']}>
-                <Avatar.Image size={120} source={{ uri: `${SERVER_URL}images/jugadores/${players.foto_jugador}` }} />
-                <Text style={styles.namePlayer}>{players.nombre_jugador + ' ' + players.apellido_jugador}</Text>
-                <Text style={styles.positionPlayer}>{players.posicionPrincipal}</Text>
-                <TouchableOpacity onPress={handleLogOut} style={styles.logoutIcon}>
-                    <Entypo name="log-out" size={30} color="#FFF" />
-                </TouchableOpacity>
-            </LinearGradient>
+                <LinearGradient style={styles.linearGradient} colors={['#03045E', '#0608C4']}>
+                    <Avatar.Image size={120} source={{ uri: `${SERVER_URL}images/jugadores/${players.foto_jugador}` }} />
+                    <Text style={styles.namePlayer}>{players.nombre_jugador + ' ' + players.apellido_jugador}</Text>
+                    <Text style={styles.positionPlayer}>{players.posicionPrincipal}</Text>
+                    <TouchableOpacity onPress={handleLogOut} style={styles.logoutIcon}>
+                        <Entypo name="log-out" size={30} color="#FFF" />
+                    </TouchableOpacity>
+                </LinearGradient>
 
-            {/*BUTTONS*/}
-            <View style={styles.rowButton}>
-                <Chip
-                    style={{ backgroundColor: activeChip === 'informacion' ? '#03045E' : '#F2EEEF', }}
-                    onPress={() => changeScreen('informacion')}
-                    textStyle={{ color: activeChip === 'informacion' ? 'white' : '#9A9A9A' }}>Información
-                </Chip>
+                {/*BUTTONS*/}
+                <View style={styles.rowButton}>
+                    <Chip
+                        style={{ backgroundColor: activeChip === 'informacion' ? '#03045E' : '#F2EEEF', }}
+                        onPress={() => changeScreen('informacion')}
+                        textStyle={{ color: activeChip === 'informacion' ? 'white' : '#9A9A9A' }}>Información
+                    </Chip>
+                </View>
+
+                {/*INFORMACION SELECCIONADA*/}
+                {contentComponent}
             </View>
-            <AlertComponent
-                visible={alertVisible}
-                type={alertType}
-                message={alertMessage}
-                onClose={handleAlertClose}
-            />
-
-            {/*INFORMACION SELECCIONADA*/}
-            {contentComponent}
-        </View>
+        </AlertNotificationRoot>
     );
 }
 

@@ -26,19 +26,16 @@ const WelcomeScreen = () => {
                       style={styles.image}
                   />
               </View>
-              <View style={styles.row}>
-                  <Image style={styles.icon} source={require('../../assets/gol_blanco 2.png')}/>
-              </View>
               <View style={styles.containerText}>
                   <Text style={styles.title}>Un gol para El Salvador</Text>
                   <Text style={styles.textContent}>Lleva el control de tus entrenos y partidos diariamente</Text>
               </View>
               <TouchableOpacity  onPress={() => (navigation.navigate('LoginScreen'))}>
-                  <LinearGradient colors={['#5A71FF', '#1A2462']} style={styles.button}>
+                  <View style={styles.button}>
                       <View style={styles.row}>
                           <Text style={styles.buttonText}>Empezar</Text>
                       </View>
-                  </LinearGradient>
+                  </View>
               </TouchableOpacity>
           </ScrollView>
       </LinearGradient>
@@ -50,14 +47,12 @@ export default WelcomeScreen;
 const styles = StyleSheet.create({
     container: {
         alignItems: 'center',
-        width: null,
-        height: 450
     },
     button: {
-        backgroundColor: 'white',
+        backgroundColor: '#3235b6',
         padding: 15,
         borderRadius: 10,
-        marginTop: height * 0.05,
+        marginTop: 40,
         marginHorizontal: 20,
         marginBottom: 35
     },
@@ -65,9 +60,8 @@ const styles = StyleSheet.create({
         flex: 1
     },
     image: {
-        flex: 1,
-        resizeMode: 'cover',
-        aspectRatio: width * 0.003,
+        height: height * 0.7,
+        width: '100%',
         borderRadius: 30
     },
     title: {
@@ -82,7 +76,8 @@ const styles = StyleSheet.create({
         fontFamily: 'Poppins_400Regular'
     },
     containerText:{
-        marginHorizontal: 20
+        marginHorizontal: 20,
+        marginTop: 20
     },
     buttonText:{
         color: '#fff',
