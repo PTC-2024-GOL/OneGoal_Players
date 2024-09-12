@@ -68,10 +68,10 @@ const MedicalHistory = () => {
         });
 
         setInjuries(info);
-        setData(true);
+        setResponse(true);
       } else {
         console.log(data.error);
-        setData(false);
+        setResponse(false);
       }
     } catch (e) {
       console.log(e);
