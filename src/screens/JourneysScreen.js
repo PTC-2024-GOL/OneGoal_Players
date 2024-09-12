@@ -5,6 +5,7 @@ import { useNavigation, useRoute, useFocusEffect } from "@react-navigation/nativ
 import fetchData from '../../api/components';
 import LoadingComponent from "../components/LoadingComponent";
 import JourneyCard from '../components/Cards/JourneyCard';
+import { Searchbar } from 'react-native-paper';
 
 const windowHeight = Dimensions.get('window').height;
 const windowWidth = Dimensions.get('window').width;
@@ -16,13 +17,17 @@ const JourneysScreen = ({ logueado, setLogueado }) => {
     const [refreshing, setRefreshing] = useState(false); // Estado para controlar el refresco
     const [loading, setLoading] = useState(true); // Estado para controlar la carga inicial
     const [response, setResponse] = useState(false); // Estado para controlar si hay datos
+    const [searchQuery, setSearchQuery] = useState("");
+    //Constantes para la busqueda con el elemento de la libreria searchBar
+    const onChangeSearch = (query) => setSearchQuery(query);
 
     const [journeys, setJourneys] = useState([]);
     const navigation = useNavigation();
 
-    const fillCards = async () => {
+    const fillCards = async (searchForm = null) => {
         try {
-            const DATA = await fetchData(API, 'readAllMobile');
+            const action = searchForm ? "searchRows" : "readAllMobile";
+            const DATA = await fetchData(API, action, searchForm);
 
             if (DATA.status) {
                 let data = DATA.dataset;
@@ -56,6 +61,16 @@ const JourneysScreen = ({ logueado, setLogueado }) => {
         fillCards();
     }, []);
 
+    useEffect(() => {
+        if (searchQuery != "") {
+            const formData = new FormData();
+            formData.append("search", searchQuery);
+            fillCards(formData);
+        } else {
+            fillCards();
+        }
+    }, [searchQuery]);
+
     useFocusEffect(
         useCallback(() => {
             fillCards();
@@ -63,15 +78,15 @@ const JourneysScreen = ({ logueado, setLogueado }) => {
     )
     const handleTrainingPress = (idJornada) => {
         navigation.navigate('LoginNav', {
-          screen: 'Entrenamientos',
-          params: {idJornada}
+            screen: 'Entrenamientos',
+            params: { idJornada }
         });
     };
 
     const handleRatingsPress = (idJornada) => {
         navigation.navigate('LoginNav', {
-          screen: 'Calificaciones',
-          params: {idJornada}
+            screen: 'Calificaciones',
+            params: { idJornada }
         });
     };
 
@@ -89,9 +104,13 @@ const JourneysScreen = ({ logueado, setLogueado }) => {
                 </Text>
             </View>
             <View style={styles.infoRowFour}>
-                <TouchableOpacity style={styles.button}>
-                    <Text style={styles.buttonText}>Jornadas</Text>
-                </TouchableOpacity>
+                <Searchbar
+                    placeholder="Buscar jornada..."
+                    onChangeText={onChangeSearch}
+                    value={searchQuery}
+                    placeholderTextColor='gray'
+                    style={styles.searchbar}
+                />
             </View>
 
             {loading ? (
@@ -159,6 +178,16 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         marginBottom: 16,
         maxWidth: windowWidth * 0.6,
+    },
+    searchbar: {
+        flex: 1,
+        marginVertical: 10,
+        backgroundColor: 'white',
+        borderWidth: 1,
+        borderColor: '#EBF0FF',
+        color: 'gray',
+        maxHeight: windowHeight * 0.07,
+        maxWidth: windowWidth * 0.9,
     },
     buttonText: {
         color: '#fff',
