@@ -24,9 +24,10 @@ const MedicalHistory = () => {
   ]);
   const [data, setData] = useState(false);
 
-  const fillRegistroMedico = async () => {
+  const fillRegistroMedico = async (searchForm = null) => {
     try {
-        const data = await fetchData(API, 'readAllMobile');
+      const action = searchForm ? "searchRows" : "readAllMobile";
+      const data = await fetchData(API, action, searchForm);
         if (data.status) {
             const info = data.dataset.map(item => {
                 const part = item.nombre_sub_tipologia;
@@ -74,6 +75,16 @@ const MedicalHistory = () => {
     initializeApp();
 }, []);
 
+useEffect(() => {
+  if (searchQuery != "") {
+    const formData = new FormData();
+    formData.append("search", searchQuery);
+    fillRegistroMedico(formData);
+  } else {
+    fillRegistroMedico();
+  }
+}, [searchQuery]);
+
 useFocusEffect(
     useCallback(() => {
         const initializeApp = async () => {
@@ -92,14 +103,13 @@ useFocusEffect(
           Selecciona un registro o un retorno y observa tus fechas de la lesión y retorno a los partidos
         </Text>
       </View>
-      <View style={styles.searchContainer}>
-        <Ionicons name="search" size={20} color="#777" style={styles.searchIcon} />
-        <TextInput
-          style={styles.searchInput}
-          placeholder="Buscar..."
-          placeholderTextColor="#777"
-        />
-      </View>
+      <Searchbar
+        placeholder="Buscar pagos"
+        placeholderTextColor="gray"
+        onChangeText={onChangeSearch}
+        value={searchQuery}
+        style={styles.searchbar}
+      />
       <View style={styles.tableHeader}>
         <Text style={styles.tableHeaderText}>Lesión</Text>
         <Text style={styles.tableHeaderText}>Días lesionado</Text>
@@ -371,6 +381,16 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
   },
+  searchbar: {
+    flex: 1,
+    marginVertical: 10,
+    backgroundColor: 'white',
+    borderWidth: 1,
+    borderColor: 'gray',
+    color: 'gray',
+    maxHeight: windowHeight * 0.065,
+    maxWidth: windowWidth * 0.9,
+},
 });
 
 export default MedicalHistory;
