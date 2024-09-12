@@ -4,6 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import fetchData from '../../api/components';
 import { useFocusEffect } from "@react-navigation/native";
+import { Searchbar } from 'react-native-paper';
 
 const windowWidth = Dimensions.get('window').width;
 const windowHeight = Dimensions.get('window').height;
@@ -15,6 +16,9 @@ const MedicalHistory = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedInjury, setSelectedInjury] = useState(null);
   const [returnModalVisible, setReturnModalVisible] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  //Constantes para la busqueda con el elemento de la libreria searchBar
+  const onChangeSearch = query => setSearchQuery(query);
   const [injuries, setInjuries] = useState([
     { part: ' ', days: ' ', injuryDate: ' ', returnDate: ' ', returnTraining:' ', returnMatch:' '  },
   ]);
