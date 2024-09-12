@@ -3,12 +3,13 @@ import { View, StyleSheet, ImageBackground, TouchableOpacity, Text, Image, Dimen
 import { TextInput, DefaultTheme, Provider as PaperProvider, Surface } from 'react-native-paper';
 import { LinearGradient } from 'expo-linear-gradient';
 import fetchData from '../../api/components';
-import AlertComponent from '../components/AlertComponent';
 import { useNavigation } from '@react-navigation/native'; // Importa useNavigation
 
 // Importa la imagen de fondo y el logo
 import background from '../../assets/background.png';
 import logo from '../../assets/gol_blanco 2.png';
+import {AlertNotificationRoot} from "react-native-alert-notification";
+import {DialogNotification, ToastNotification} from "../components/Alerts/AlertComponent";
 
 const windowHeight = Dimensions.get('window').height;
 const windowWidth = Dimensions.get('window').width;
@@ -28,14 +29,9 @@ const LoginScreen = ({ logueado, setLogueado }) => {
   // Estados para los campos de alias y clave
   const [alias, setAlias] = useState('');
   const [clave, setClave] = useState('');
-  const [alertVisible, setAlertVisible] = useState(false);
-  const [alertType, setAlertType] = useState(1);
-  const [alertMessage, setAlertMessage] = useState('');
-  const [alertCallback, setAlertCallback] = useState(null);
 
   // URL de la API para el usuario
   const USER_API = 'services/players/jugadores.php';
-
 
   const navigation = useNavigation(); // Obtiene el objeto de navegación
 
@@ -50,106 +46,71 @@ const LoginScreen = ({ logueado, setLogueado }) => {
       // Realización de la petición de inicio de sesión
       const data = await fetchData(USER_API, 'logIn', formData);
       if (data.status) {
-        setAlertType(1);
-        setAlertMessage(`${data.message}`);
-        setAlertCallback(() => () => setLogueado(!logueado));
-        setAlertVisible(true);
+        DialogNotification(1, data.message, 'Aceptar', goToHome)
       } else {
         console.log(data);
-        setAlertType(2);
-        setAlertMessage(`Error sesión: ${data.error}`);
-        setAlertCallback(null);
-        setAlertVisible(true);
+        ToastNotification(2, data.error, true);
       }
     } catch (error) {
       console.log('Error: ', error);
-      setAlertType(2);
-      setAlertMessage(`Error: no se detecto usuario`);
-      setAlertCallback(null);
-      setAlertVisible(true);
+        ToastNotification(3, 'No se encontró ningún usuario', true);
     }
   };
 
-  const handleAlertClose = () => {
-    setAlertVisible(false);
-    if (alertCallback) alertCallback();
-  };
-
-  // Manejo de cierre de sesión
-  const handleLogOut = async () => {
-    try {
-      const data = await fetchData(USER_API, 'logOut');
-      if (data.status) {
-        setLogueado(false);
-      } else {
-        Alert.alert('Error sesión', data.error);
-      }
-    } catch (error) {
-      console.log('Error: ', error);
-      Alert.alert('Error sesión', error);
-    }
-  };
-
-  const handleForgotPassword = () => {
-    // Navegar a la pantalla de recuperación de contraseña
-    navigation.navigate('RecoverPassword');
-  };
-
+  const goToHome = () => {
+      setLogueado(!logueado)
+  }
 
   return (
-    <PaperProvider theme={theme}>
-      <ImageBackground source={background} style={styles.background}>
-        <View style={styles.overlay}>
-          <Image source={logo} style={styles.logo} />
-          <Text style={styles.logInText}>Inicio de sesión</Text>
-          <TextInput
-            placeholder='Correo electrónico'
-            style={styles.input}
-            keyboardType="email-address"
-            autoCapitalize="none"
-            underlineColor="transparent"
-            mode="flat"
-            selectionColor="white"
-            placeholderTextColor="white"
-            textColor='#ffffff'
-            value={alias}
-            onChangeText={setAlias}
-            cursorColor='white'
-            theme={{ colors: { primary: 'white', placeholder: 'white', text: 'white', background: 'transparent' } }}
-            labelStyle={{ color: 'white' }}
-          />
-          <TextInput
-            placeholder='Contraseña'
-            style={styles.input}
-            secureTextEntry
-            underlineColor="transparent"
-            mode="flat"
-            selectionColor="white"
-            placeholderTextColor="white"
-            textColor='#ffffff'
-            value={clave}
-            onChangeText={setClave}
-            cursorColor='white'
-            theme={{ colors: { primary: 'white', placeholder: 'white', text: 'white', background: 'transparent' } }}
-            labelStyle={{ color: 'white' }} // Estilo personalizado para el label
-          />
-          <TouchableOpacity style={styles.button} onPress={handleLogin}>
-            <LinearGradient
-              colors={['#354AC8', '#1A2462']}
-              style={styles.gradient}
-            >
-              <Text style={styles.buttonText}>Iniciar sesión</Text>
-            </LinearGradient>
-          </TouchableOpacity>
-        </View>
-      </ImageBackground>
-      <AlertComponent
-        visible={alertVisible}
-        type={alertType}
-        message={alertMessage}
-        onClose={handleAlertClose}
-      />
-    </PaperProvider>
+    <AlertNotificationRoot>
+      <PaperProvider theme={theme}>
+        <ImageBackground source={background} style={styles.background}>
+          <View style={styles.overlay}>
+            <Image source={logo} style={styles.logo} />
+            <Text style={styles.logInText}>Inicio de sesión</Text>
+            <TextInput
+                placeholder='Correo electrónico'
+                style={styles.input}
+                keyboardType="email-address"
+                autoCapitalize="none"
+                underlineColor="transparent"
+                mode="flat"
+                selectionColor="white"
+                placeholderTextColor="white"
+                textColor='#ffffff'
+                value={alias}
+                onChangeText={setAlias}
+                cursorColor='white'
+                theme={{ colors: { primary: 'white', placeholder: 'white', text: 'white', background: 'transparent' } }}
+                labelStyle={{ color: 'white' }}
+            />
+            <TextInput
+                placeholder='Contraseña'
+                style={styles.input}
+                secureTextEntry
+                underlineColor="transparent"
+                mode="flat"
+                selectionColor="white"
+                placeholderTextColor="white"
+                textColor='#ffffff'
+                value={clave}
+                onChangeText={setClave}
+                cursorColor='white'
+                theme={{ colors: { primary: 'white', placeholder: 'white', text: 'white', background: 'transparent' } }}
+                labelStyle={{ color: 'white' }} // Estilo personalizado para el label
+            />
+            <TouchableOpacity style={styles.button} onPress={handleLogin}>
+              <LinearGradient
+                  colors={['#354AC8', '#1A2462']}
+                  style={styles.gradient}
+              >
+                <Text style={styles.buttonText}>Iniciar sesión</Text>
+              </LinearGradient>
+            </TouchableOpacity>
+          </View>
+        </ImageBackground>
+      </PaperProvider>
+    </AlertNotificationRoot>
   );
 };
 
@@ -196,7 +157,8 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontWeight: 'semibold',
     fontSize: 16,
-    width: windowWidth * 0.35
+    width: windowWidth * 0.35,
+    textAlign: "center"
   },
   forgotPassword: {
     marginTop: 10,
