@@ -15,6 +15,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import fetchData from "../../api/components";
 import { useFocusEffect } from "@react-navigation/native";
 import { Searchbar } from "react-native-paper";
+import LoadingComponent from "../components/LoadingComponent";
 
 const windowHeight = Dimensions.get('window').height;
 const windowWidth = Dimensions.get('window').width;
@@ -27,6 +28,8 @@ const PaymentScreen = () => {
   const [selectedPayment, setSelectedPayment] = useState(null);
   const [data, setData] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [response, setResponse] = useState(false); // Estado para controlar si hay datos
+  const [loading, setLoading] = useState(true); // Estado para controlar la carga inicial
   //Constantes para la busqueda con el elemento de la libreria searchBar
   const onChangeSearch = (query) => setSearchQuery(query);
   const [payments, setPaymets] = useState([
@@ -58,14 +61,17 @@ const PaymentScreen = () => {
         });
 
         setPaymets(info);
-        setData(true);
+        setResponse(true);
       } else {
         console.log(data.error);
-        setData(false);
+        setResponse(false);
       }
     } catch (e) {
       console.log(e);
     }
+    finally {
+      setLoading(false);
+  }
   };
 
   const openModal = (payment) => {
@@ -126,7 +132,11 @@ const PaymentScreen = () => {
         <Text style={[styles.tableHeaderText, styles.totalColumn]}>Total</Text>
         <Text style={[styles.tableHeaderText, styles.dateColumn]}>Fecha</Text>
       </View>
-      <ScrollView style={styles.scrollView}>
+      {loading ? (
+        <LoadingComponent />
+      ) : response ? (
+        <View style={styles.scrollContainer}>
+          <ScrollView style={styles.scrollView}>
         {payments.map((payment, index) => (
           <View key={index} style={styles.paymentRow}>
             <Text style={[styles.paymentText, styles.amountColumn]}>
@@ -159,6 +169,37 @@ const PaymentScreen = () => {
           </View>
         ))}
       </ScrollView>
+        </View>
+      ) : (
+        <ScrollView
+          style={styles.scrollContainer}
+        >
+          <View
+            style={{
+              height: 200,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <Image
+              style={{ height: 80, width: 80, marginBottom: 10 }}
+              source={require("../../assets/find.png")}
+            />
+            <Text
+              style={{
+                backgroundColor: "#e6ecf1",
+                color: "#043998",
+                padding: 20,
+                borderRadius: 15,
+                maxWidth: 300,
+              }}
+            >
+              No se encontraron pagos
+            </Text>
+          </View>
+        </ScrollView>
+      )}
 
       {/* Modal de Fecha y Mes */}
       <Modal
@@ -383,6 +424,10 @@ const styles = StyleSheet.create({
     color: 'gray',
     maxHeight: windowHeight * 0.065,
     maxWidth: windowWidth * 0.9,
+},
+scrollContainer: {
+  flex: 1,
+  paddingBottom: 15,
 },
 });
 
