@@ -163,7 +163,9 @@ const TestPlayerScreen = () => {
             ) : (
                 <ScrollView
                     style={styles.scrollContainer}
-                    refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+                    refreshControl={
+                        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="white" colors={['white', 'white', 'white']}
+                            progressBackgroundColor="#020887" />}
                     keyboardShouldPersistTaps="always" // Añadir esta línea
                 >
                     <View>
