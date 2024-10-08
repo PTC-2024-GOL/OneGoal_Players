@@ -19,6 +19,8 @@ import PlayerCard from '../components/Cards/PlayerCard';
 import { Card } from 'react-native-paper';
 import { AlertNotificationRoot } from "react-native-alert-notification";
 import { DialogNotification, ToastNotification } from "../components/Alerts/AlertComponent";
+import NotificationsModal from '../components/Modals/NotificationsModal';
+import TestModal from '../components/Modals/TestModal';
 const { width, height } = Dimensions.get('window');
 
 // URL de la API para el usuario
@@ -53,7 +55,7 @@ const HomeScreen = ({ logueado, setLogueado }) => {
             navigation.navigate('LoginNav', {
                 screen: 'Buscar',
                 params: {
-                    search: searchQuery, 
+                    search: searchQuery,
                 }
             });
         } else {
@@ -491,6 +493,16 @@ const HomeScreen = ({ logueado, setLogueado }) => {
         });
     };
 
+    const [modalNotificationVisible, setModalNotificationVisible] = useState(false);
+    const [modalTestVisible, setModalTestVisible] = useState(false);
+    const handleNotifications = () => {
+        setModalNotificationVisible(true);  // Abrir el modal
+    };
+    
+    const handleTestButtonPress = () => {
+        setModalTestVisible(true);
+    };
+
     const handleGrades = () => {
         navigation.navigate('Jornadas');
     };
@@ -740,6 +752,19 @@ const HomeScreen = ({ logueado, setLogueado }) => {
                                         <Text style={styles.viewProfileText}>Ver mi perfil</Text>
                                     </TouchableOpacity>
                                 </View>
+                                <TouchableOpacity style={styles.viewNotificationButton} onPress={handleNotifications}>
+                                    <MaterialCommunityIcons name="bell-alert" size={24} color="white" />
+                                </TouchableOpacity>
+                                <TouchableOpacity style={styles.viewNotificationButton} onPress={handleTestButtonPress}>
+                                    <MaterialCommunityIcons name="file-document-edit" size={24} color="white" />
+                                </TouchableOpacity>
+                                {/* Modal de notificaciones */}
+                                <NotificationsModal
+                                    modalVisible={modalNotificationVisible}
+                                    setModalVisible={setModalNotificationVisible}
+                                />
+                                {/* Modal del test */}
+                                <TestModal modalVisible={modalTestVisible} setModalVisible={setModalTestVisible} />
                             </View>
                         </View>
                     </View>
@@ -1297,6 +1322,14 @@ const styles = StyleSheet.create({
         backgroundColor: '#0077B6',
         borderRadius: 5,
     },
+    viewNotificationButton: {
+        marginTop: 30,
+        marginRight: 'auto',
+        paddingVertical: 5,
+        paddingHorizontal: 10,
+        backgroundColor: '#000',
+        borderRadius: 5,
+    },
     viewProfileText: {
         color: 'white',
     },
@@ -1511,7 +1544,7 @@ const styles = StyleSheet.create({
         shadowRadius: 4,
         elevation: 5,
         width: width * 0.7,
-        maxHeight: height * 0.25, // Asegura una altura mínima
+        maxHeight: height * 0.45, // Asegura una altura mínima
     },
     dateText: {
         fontSize: 16,
