@@ -54,7 +54,6 @@ const LoginScreen = ({ logueado, setLogueado }) => {
         if (data.status) {
           DialogNotification(1, data.message, 'Aceptar', goToHome)
         } else {
-          console.log(data);
           ToastNotification(2, data.error, true);
         }
       } catch (error) {

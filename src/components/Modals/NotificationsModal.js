@@ -1,30 +1,177 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Modal, View, Text, TouchableOpacity, StyleSheet, FlatList, Dimensions, ScrollView } from 'react-native';
+import { Modal, View, Text, TouchableOpacity, StyleSheet, FlatList, Dimensions, ScrollView, Image } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { FontAwesome, Entypo, MaterialIcons, Ionicons, Fontisto, MaterialCommunityIcons } from '@expo/vector-icons'; // Importa múltiples librerías de iconos
 import Chip from '../Chip/Chip';
+import fetchData from '../../../api/components';
 const { width, height } = Dimensions.get('window');
 
 const NotificationsModal = ({ modalVisible, setModalVisible }) => {
 
-    const [selectedTab, setSelectedTab] = useState('messages');
-    const [notifications, setNotifications] = useState([
-        { id: 1, message: 'Tu cita médica está programada para mañana a las 10:00 AM.', date: '07/10/2024', view: "0", type: 'Registro medico' },
-        { id: 2, message: 'El resultado de tu prueba está disponible en el sistema.', date: '06/10/2024', view: "0", type: 'Entrenamiento' },
-        { id: 3, message: 'Recuerda completar tu test físico después del entrenamiento.', date: '05/10/2024', view: "0", type: 'Test' },
-        { id: 4, message: 'Felicitaciones marcaste un gol en tu ultimo partido.', date: '05/10/2024', view: "1", type: 'Partido' },
-        { id: 5, message: 'Gol te desea un feliz cumpleaños.', date: '05/10/2024', view: "1", type: 'Eventos' },
-        { id: 6, message: 'Tu recap del mes esta disponible, da click para verlo .', date: '05/10/2024', view: "1", type: 'Eventos' },
-    ]);
+    const API = "services/players/notificaciones.php";
+    const [selectedTab, setSelectedTab] = useState('todas');
+    const [notifications, setNotifications] = useState([]);
+    const [refreshing, setRefreshing] = useState(false);
+    const navigation = useNavigation(); // Obtiene el objeto de navegación
     const closeModal = () => {
+        setSelectedTab('Todas');
         setModalVisible(false); // Cerrar el modal
     };
 
+    // Función para obtener las notificaciones
+    const fetchNotifications = async (filterForm = null) => {
+        try {
+            const action = filterForm ? "filterNotis" : "readMyNotis";
+            const data = await fetchData(API, action, filterForm);
+            if (data.status === 1) {
+                const registros = data.dataset.map((item) => ({
+                    title: item.TITULO,
+                    id: item.ID,
+                    message: item.MENSAJE,
+                    date: item.FECHA,
+                    type: `${item.TIPO}`,
+                    view: item.VISTO,
+                    evento: item.EVENTO,
+                }));
+                setNotifications(registros);
+            } else {
+                console.log(data.error);
+                setNotifications([]);
+            }
+        } catch (error) {
+            console.log('Error trayendo las notificaciones:', error);
+        } finally {
+            console.log(notifications);
+        }
+    };
+
+
+    useEffect(() => {
+        fetchNotifications();
+    }, []);
+
+    useFocusEffect(
+        useCallback(() => {
+            fetchNotifications();
+        }, [])
+    );
+
+    const onRefresh = useCallback(() => {
+        setRefreshing(true);
+        fetchNotifications().finally(() => setRefreshing(false));
+    }, []);
+
+    useEffect(() => {
+        if (selectedTab == "Registro medico" || selectedTab == "Test"
+            || selectedTab == "Entrenamiento" || selectedTab == "Eventos"
+            || selectedTab == "Partido"
+        ) {
+            const formData = new FormData();
+            formData.append("tipo", selectedTab);
+            fetchNotifications(formData);
+        } else {
+            fetchNotifications();
+        }
+    }, [selectedTab]);
 
     // Función para abrir el modal y marcar como vista la notificación
     const openNotification = async (item) => {
-        console.log('Aquí se abrira el detalle de la notificación');
-        console.log(item);
+        // Aquí podrías hacer una petición a tu API para marcar la notificación como vista
+        if (item.view === "0") {
+            const formData = new FormData();
+            formData.append("id", item.id);
+            await fetchData(API, "markAsRead", formData);
+            fetchNotifications();  // Refresca las notificaciones para reflejar el cambio
+            if (item.type === "Registro medico") {
+                closeModal();
+                navigation.navigate('Medico');
+            } else if (item.type === "Test") {
+                closeModal();
+            } else if (item.type === "Entrenamiento") {
+                if (item.title === "Nuevo entrenamiento programado") {
+                    closeModal();
+                    navigation.navigate('LoginNav', {
+                        screen: 'Entrenamientos',
+                        params: { idJornada: item.evento }
+                    });
+                } else {
+
+                    closeModal();
+                }
+            } else if (item.type === "Eventos") {
+                if(item.title === "Tu recap mensual está listo"){
+                    closeModal();
+                    navigation.navigate('LoginNav', {
+                        screen: 'RECAP',
+                    });
+                }else if(item.title === "Feliz Cumpleaños"){
+                    closeModal();
+                }else if(item.title === "Convocatoria para el partido"){
+                    closeModal();
+                }
+            } else if (item.type === "Partido") {
+                if (item.title === "Convocatoria para el partido") {
+                    closeModal();
+                    navigation.navigate('Rendimiento');
+                } else if (item.title === "No convocado para el partido") {
+                    closeModal();
+                    navigation.navigate('Rendimiento');
+                } else if (item.title === "¡Gol anotado!") {
+                    closeModal();
+                    navigation.navigate('Rendimiento');
+                } else if (item.title === "Amonestación recibida") {
+                    closeModal();
+                    navigation.navigate('Rendimiento');
+                }
+            } else {
+                console.log('El tipo de la notificación no se identifico correctamente');
+            }
+        } else {
+            if (item.type === "Registro medico") {
+                closeModal();
+                navigation.navigate('Medico');
+            } else if (item.type === "Test") {
+                closeModal();
+            } else if (item.type === "Entrenamiento") {
+                if (item.title === "Nuevo entrenamiento programado") {
+                    closeModal();
+                    navigation.navigate('LoginNav', {
+                        screen: 'Entrenamientos',
+                        params: { idJornada: item.evento }
+                    });
+                } else {
+                    closeModal();
+                }
+            } else if (item.type === "Eventos") {
+                if(item.title === "Tu recap mensual está listo"){
+                    closeModal();
+                    navigation.navigate('LoginNav', {
+                        screen: 'RECAP',
+                    });
+                }else if(item.title === "Feliz Cumpleaños"){
+                    closeModal();
+                }else if(item.title === "Convocatoria para el partido"){
+                    closeModal();
+                }
+            } else if (item.type === "Partido") {
+                if (item.title === "Convocatoria para el partido") {
+                    closeModal();
+                    navigation.navigate('Rendimiento');
+                } else if (item.title === "No convocado para el partido") {
+                    closeModal();
+                    navigation.navigate('Rendimiento');
+                } else if (item.title === "¡Gol anotado!") {
+                    closeModal();
+                    navigation.navigate('Rendimiento');
+                } else if (item.title === "Amonestación recibida") {
+                    closeModal();
+                    navigation.navigate('Rendimiento');
+                }
+            } else {
+                console.log('El tipo de la notificación no se identifico correctamente');
+            }
+        }
     };
 
     // Función para obtener el ícono según el tipo de notificación
@@ -120,28 +267,36 @@ const NotificationsModal = ({ modalVisible, setModalVisible }) => {
                     </View>
 
                     {/* Lista de notificaciones */}
-                    <FlatList
-                        data={notifications}
-                        keyExtractor={item => item.id.toString()}
-                        renderItem={({ item }) => (
-                            <TouchableOpacity
-                                key={item.id}
-                                style={[
-                                    styles.card,
-                                    { backgroundColor: item.view === "0" ? '#ffffff' : '#dfdfdf' } // Color según el estado (visto o no)
-                                ]}
-                                onPress={() => openNotification(item)}
-                            >
-                                <View style={styles.cardIcon}>
-                                    {getIcon(item.type)}
-                                </View>
-                                <View style={styles.notificationItem}>
-                                    <Text style={styles.notificationText}>{item.message}</Text>
-                                    <Text style={styles.notificationDate}>{item.date}</Text>
-                                </View>
-                            </TouchableOpacity>
-                        )}
-                    />
+
+                    {notifications.length > 0 && notifications ? (
+                        <FlatList
+                            data={notifications}
+                            keyExtractor={item => item.id.toString()}
+                            renderItem={({ item }) => (
+                                <TouchableOpacity
+                                    key={item.id}
+                                    style={[
+                                        styles.card,
+                                        { backgroundColor: item.view === "0" ? '#ffffff' : '#dfdfdf' } // Color según el estado (visto o no)
+                                    ]}
+                                    onPress={() => openNotification(item)}
+                                >
+                                    <View style={styles.cardIcon}>
+                                        {getIcon(item.type)}
+                                    </View>
+                                    <View style={styles.notificationItem}>
+                                        <Text style={styles.notificationText}>{item.message}</Text>
+                                        <Text style={styles.notificationDate}>{item.date}</Text>
+                                    </View>
+                                </TouchableOpacity>
+                            )}
+                        />
+                    ) : (
+                        <View style={{ height: 200, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <Image style={{ height: 80, width: 80, marginBottom: 10 }} source={require('../../../assets/find.png')} />
+                            <Text style={{ backgroundColor: '#e6ecf1', color: '#043998', padding: 20, borderRadius: 15, maxWidth: 300 }}>No se encontraron resultados</Text>
+                        </View>
+                    )}
                 </View>
             </View>
         </Modal>
@@ -196,13 +351,11 @@ const styles = StyleSheet.create({
     },
     notificationItem: {
         padding: 15,
-        borderBottomWidth: 1,
-        borderBottomColor: '#ddd',
     },
     notificationText: {
         fontSize: 16,
         color: '#333',
-        width: width * 0.75,
+        width: width * 0.7,
     },
     notificationDate: {
         fontSize: 12,
@@ -211,14 +364,13 @@ const styles = StyleSheet.create({
     },
     card: {
         flexDirection: 'row',
-        padding: 10,
+        padding: 15,
         borderRadius: 5,
+        marginTop: 10,
+        marginStart: 10,
+        marginEnd: 10,
         marginBottom: 10,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 5,
-        elevation: 3,
+        elevation: 2,
     },
     cardIcon: {
         width: 50,

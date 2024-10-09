@@ -25,7 +25,6 @@ export default function App() {
       const data = await fetchData(API, 'getUser');
       if (data.session) {
         setLogueado(true)
-        console.log(data.nombre);
 
         setTimeout(()=>{
           setLoad(false)

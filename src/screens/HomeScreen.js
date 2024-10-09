@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import {
-    View, StyleSheet, TouchableOpacity, Image, Dimensions, TextInput, ScrollView,
-    RefreshControl, Modal, ActivityIndicator
+    View, StyleSheet, TouchableOpacity, Image, Dimensions, ScrollView,
+    RefreshControl, Modal
 } from 'react-native';
 import { Text, Searchbar, Surface } from 'react-native-paper';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -359,7 +359,6 @@ const HomeScreen = ({ logueado, setLogueado }) => {
                 amarillas: profileData.TARJETAS_AMARILLAS,
                 rojas: profileData.TARJETAS_ROJAS,
             });
-            console.log(data.dataset);
         } catch (error) {
             console.log(error);
             setStats({
@@ -753,10 +752,10 @@ const HomeScreen = ({ logueado, setLogueado }) => {
                                     </TouchableOpacity>
                                 </View>
                                 <TouchableOpacity style={styles.viewNotificationButton} onPress={handleNotifications}>
-                                    <MaterialCommunityIcons name="bell-alert" size={24} color="white" />
+                                    <MaterialCommunityIcons name="bell-alert" size={18} color="white" />
                                 </TouchableOpacity>
                                 <TouchableOpacity style={styles.viewNotificationButton} onPress={handleTestButtonPress}>
-                                    <MaterialCommunityIcons name="file-document-edit" size={24} color="white" />
+                                    <MaterialCommunityIcons name="file-document-edit" size={18} color="white" />
                                 </TouchableOpacity>
                                 {/* Modal de notificaciones */}
                                 <NotificationsModal
@@ -1327,7 +1326,7 @@ const styles = StyleSheet.create({
         marginRight: 'auto',
         paddingVertical: 5,
         paddingHorizontal: 10,
-        backgroundColor: '#000',
+        backgroundColor: '#020887',
         borderRadius: 5,
     },
     viewProfileText: {

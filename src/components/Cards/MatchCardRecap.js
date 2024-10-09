@@ -27,15 +27,15 @@ const styles = StyleSheet.create({
     card: {
         padding: 15,
         marginBottom: 25,
-        backgroundColor: '#fff'
+        backgroundColor: '#203BDC'
     },
     title: {
       textAlign: "center",
       fontFamily: 'Poppins_700Bold',
-      backgroundColor: '#def7f8',
+      backgroundColor: '#6791FF',
       padding: 4,
       marginBottom: 10,
-      borderRadius: 12
+      borderRadius: 12,
     },
     row: {
         flexDirection: "row",
@@ -50,15 +50,18 @@ const styles = StyleSheet.create({
     img: {
         borderRadius: 100,
         width: 50,
-        height: 50
+        height: 50,
+        backgroundColor: 'white',
     },
     dateTitle: {
-        fontFamily: 'Poppins_600SemiBold'
+        fontFamily: 'Poppins_600SemiBold',
+        color: 'white'
     },
     dateText: {
         fontFamily: 'Poppins_400Regular',
         width: 120,
         textAlign: "center",
-        fontSize: 12
+        fontSize: 12,
+        color: 'white'
     }
 });
