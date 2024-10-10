@@ -30,6 +30,8 @@ export default function RecapScreen() {
     const [progress, setProgress] = useState(0);
     const [matches, setMatches] = useState([]);
     const translateX = useRef(new Animated.Value(0)).current;
+    const [username, setUsername] = useState("");
+    const [foto, setFoto] = useState("../../assets/logo.png");
 
     //Estados para almacenar los datos
     const [stats, setStats] = useState({
@@ -115,17 +117,35 @@ export default function RecapScreen() {
         }
     };
 
+    //Obtiene la información del usuario desde la API
+    const getUser = async () => {
+        try {
+            const data = await fetchData(USER_API, "getUserMobile");
+            if (data.status) {
+                const [firstName] = data.username.split(" ");
+                const [firstSurname] = data.apellido.split(" ");
+                setUsername(`${firstName} ${firstSurname}`);
+                setFoto(`${SERVER_URL}images/jugadores/${data.foto}`);
+            } else {
+                console.log("Error: Nombre de jugador indefinido");
+            }
+        } catch (error) {
+            console.log(error);
+        }
+    };
     const goToPerformanceDetails = (data) => {
         navigation.navigate('LoginNav', {
             screen: 'RendimientoDetalle',
             params: { data }
         });
     };
+
     //Efecto que se ejecuta al montar el componente para inicializar la aplicación
     useEffect(() => {
         const initializeApp = async () => {
             await fillMatches();
             await readStats();
+            await getUser();
         };
         initializeApp();
     }, []);
@@ -134,7 +154,7 @@ export default function RecapScreen() {
         let interval;
         if (progress < 1) {
             interval = setInterval(() => {
-                setProgress((prev) => prev + 0.05);
+                setProgress((prev) => prev + 0.1);
             }, 100);
         } else {
             nextStory();
@@ -177,6 +197,23 @@ export default function RecapScreen() {
             });
             translateX.setValue(0);
         });
+    };
+
+    // Función para determinar el mensaje motivador según la nota promedio del jugador
+    const getMotivationalMessage = (nota) => {
+        if (nota >= 9) {
+            return "¡Impresionante! Has estado sobresaliente este mes. Sigue así, y en el futuro te convertiras en un gran jugador, el equipo confía en ti.";
+        } else if (nota >= 7.5) {
+            return "¡Gran trabajo! Tu rendimiento ha sido excelente. Aún puedes mejorar en algunos aspectos, pero vas en camino de volverte un gran jugador, ¡sigue así!.";
+        } else if (nota >= 6) {
+            return "¡Buen esfuerzo! Has mostrado un desempeño sólido. Si sigues trabajando duro, lograrás aún más.";
+        } else if (nota >= 4.5) {
+            return "No te desanimes, estás en el camino correcto. Cada partido es una oportunidad para mejorar.";
+        } else if (nota >= 3) {
+            return "Sabemos que puedes dar más. ¡No pierdas la motivación! Entrena duro y sigue adelante.";
+        } else {
+            return "Ha sido un mes difícil, pero cada error es una oportunidad de aprendizaje. ¡El esfuerzo siempre dará frutos!";
+        }
     };
 
 
@@ -314,6 +351,19 @@ export default function RecapScreen() {
                         <Text style={styles.storyText}>
                             Tu resumen del mes
                         </Text>
+                        <Image
+                            source={{ uri: foto }}
+                            style={styles.profileImage}
+                        />
+                        <Text style={styles.profileName}>{username}</Text>
+                        <Text style={styles.profileText}>{getMotivationalMessage(stats.nota)}</Text>
+                        <Surface style={[styles.surface, { backgroundColor: '#203BDC' }]} elevation={5}>
+                            <TouchableOpacity style={styles.statBox}>
+                                <MaterialCommunityIcons name="soccer" size={24} color="white" />
+                                <RNPText style={styles.statValue}>{stats.nota}</RNPText>
+                                <RNPText style={styles.statLabel}>Tu nota promedio</RNPText>
+                            </TouchableOpacity>
+                        </Surface>
                     </View>
                 );
             default:
@@ -471,5 +521,24 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         borderRadius: 25,
         margin: 10,
+    },
+    profileImage: {
+        width: screenWidth * 0.15,
+        height: screenHeight * 0.15,
+        borderRadius: 30,
+    },
+    profileName: {
+        marginLeft: 10,
+        fontSize: 20,
+        fontWeight: 'bold',
+        maxWidth: screenWidth * 0.65,
+        color: 'white',
+    },
+    profileText: {
+        marginLeft: 10,
+        fontSize: 20,
+        fontWeight: 'bold',
+        maxWidth: screenWidth * 0.65,
+        color: 'white',
     },
 });
